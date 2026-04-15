@@ -520,36 +520,79 @@ async function downloadPDF() {
 
     document.body.appendChild(pdfContainer);
 
-    const canvas = await html2canvas(pdfContainer, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      logging: false,
-      useCORS: true,
-    });
-
-    document.body.removeChild(pdfContainer);
-
     const jsPDFLib = window.jspdf || window.jsPDF;
     if (!jsPDFLib) throw new Error('jsPDF library not loaded');
     const { jsPDF } = jsPDFLib;
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfPageHeight = pdf.internal.pageSize.getHeight();
-    const imgData = canvas.toDataURL('image/png');
-    const imgHeightMM = (canvas.height * pdfWidth) / canvas.width;
+    const margin = 8;
+    const usableHeight = pdfPageHeight - margin * 2;
 
-    let heightLeft = imgHeightMM;
-    let position = 0;
+    // Render each child block separately
+    const blocks = pdfContainer.children;
+    let cursorY = 0;
 
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightMM);
-    heightLeft -= pdfPageHeight;
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      const canvas = await html2canvas(block, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+        width: 800,
+      });
 
-    while (heightLeft > 0) {
-      pdf.addPage();
-      position = heightLeft - imgHeightMM;
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightMM);
-      heightLeft -= pdfPageHeight;
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidthMM = pdfWidth - margin * 2;
+      const imgHeightMM = (canvas.height * imgWidthMM) / canvas.width;
+
+      // If block doesn't fit on current page, add new page
+      if (cursorY > 0 && cursorY + imgHeightMM > pdfPageHeight - margin) {
+        pdf.addPage();
+        cursorY = margin;
+      } else if (cursorY === 0) {
+        cursorY = margin;
+      }
+
+      // If a single block is taller than one page, split it across pages
+      if (imgHeightMM > usableHeight) {
+        let srcY = 0;
+        const srcHeightPx = canvas.height;
+        const pxPerMM = canvas.height / imgHeightMM;
+
+        while (srcY < srcHeightPx) {
+          const remainMM = pdfPageHeight - cursorY - margin;
+          const sliceHeightPx = Math.min(remainMM * pxPerMM, srcHeightPx - srcY);
+          const sliceHeightMM = sliceHeightPx / pxPerMM;
+
+          // Create a slice canvas
+          const sliceCanvas = document.createElement('canvas');
+          sliceCanvas.width = canvas.width;
+          sliceCanvas.height = Math.ceil(sliceHeightPx);
+          const ctx = sliceCanvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+          ctx.drawImage(canvas, 0, srcY, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+
+          const sliceImg = sliceCanvas.toDataURL('image/png');
+          pdf.addImage(sliceImg, 'PNG', margin, cursorY, imgWidthMM, sliceHeightMM);
+
+          srcY += sliceHeightPx;
+          if (srcY < srcHeightPx) {
+            pdf.addPage();
+            cursorY = margin;
+          } else {
+            cursorY += sliceHeightMM + 4;
+          }
+        }
+      } else {
+        pdf.addImage(imgData, 'PNG', margin, cursorY, imgWidthMM, imgHeightMM);
+        cursorY += imgHeightMM + 4;
+      }
     }
+
+    document.body.removeChild(pdfContainer);
 
     const dateStr = birthDate ? birthDate.replace(/-/g, '') : 'report';
     pdf.save(`personal-analysis-${dateStr}.pdf`);
