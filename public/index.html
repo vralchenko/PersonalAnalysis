@@ -498,18 +498,11 @@ async function downloadPDF() {
     const birthDate = document.getElementById('birthDate').value;
     const birthPlace = document.getElementById('birthPlace').value;
 
-    // Header
-    pdfContainer.innerHTML = `
-      <div style="text-align:center;margin-bottom:40px;padding-bottom:20px;border-bottom:2px solid #e0e0e0;">
-        <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">Personal Analysis</h1>
-        <p style="color:#666;">Birth: ${birthDate ? new Date(birthDate).toLocaleDateString('en-GB') : '—'} | ${birthPlace || '—'}</p>
-      </div>
-    `;
-
-    // Add all generated sections
+    // Build all sections into one flow
+    let sectionsHTML = '';
     Object.keys(SECTIONS).forEach(key => {
       if (results[key]) {
-        pdfContainer.innerHTML += `
+        sectionsHTML += `
           <div style="margin-bottom:28px;padding:24px;background:#f9f9fb;border:1px solid #e0e0e0;border-radius:10px;">
             <h2 style="color:#5b3cc4;font-size:1.3em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e0e0e0;">${SECTIONS[key]}</h2>
             <div style="white-space:pre-wrap;line-height:1.8;text-align:justify;color:#2a2a2a;">${formatText(results[key])}</div>
@@ -518,7 +511,24 @@ async function downloadPDF() {
       }
     });
 
+    pdfContainer.innerHTML = `
+      <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #e0e0e0;">
+        <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">Personal Analysis</h1>
+        <p style="color:#666;">Birth: ${birthDate ? new Date(birthDate).toLocaleDateString('en-GB') : '—'} | ${birthPlace || '—'}</p>
+      </div>
+      ${sectionsHTML}
+    `;
+
     document.body.appendChild(pdfContainer);
+
+    const canvas = await html2canvas(pdfContainer, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true,
+    });
+
+    document.body.removeChild(pdfContainer);
 
     const jsPDFLib = window.jspdf || window.jsPDF;
     if (!jsPDFLib) throw new Error('jsPDF library not loaded');
@@ -526,73 +536,31 @@ async function downloadPDF() {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfPageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 8;
+    const margin = 10;
+    const imgWidthMM = pdfWidth - margin * 2;
+    const imgHeightMM = (canvas.height * imgWidthMM) / canvas.width;
     const usableHeight = pdfPageHeight - margin * 2;
+    const pxPerMM = canvas.height / imgHeightMM;
+    let srcY = 0;
+    let page = 0;
 
-    // Render each child block separately
-    const blocks = pdfContainer.children;
-    let cursorY = 0;
+    while (srcY < canvas.height) {
+      if (page > 0) pdf.addPage();
+      const sliceHeightPx = Math.min(usableHeight * pxPerMM, canvas.height - srcY);
+      const sliceHeightMM = sliceHeightPx / pxPerMM;
 
-    for (let i = 0; i < blocks.length; i++) {
-      const block = blocks[i];
-      const canvas = await html2canvas(block, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true,
-        width: 800,
-      });
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = Math.ceil(sliceHeightPx);
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+      ctx.drawImage(canvas, 0, srcY, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
 
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidthMM = pdfWidth - margin * 2;
-      const imgHeightMM = (canvas.height * imgWidthMM) / canvas.width;
-
-      // If block doesn't fit on current page, add new page
-      if (cursorY > 0 && cursorY + imgHeightMM > pdfPageHeight - margin) {
-        pdf.addPage();
-        cursorY = margin;
-      } else if (cursorY === 0) {
-        cursorY = margin;
-      }
-
-      // If a single block is taller than one page, split it across pages
-      if (imgHeightMM > usableHeight) {
-        let srcY = 0;
-        const srcHeightPx = canvas.height;
-        const pxPerMM = canvas.height / imgHeightMM;
-
-        while (srcY < srcHeightPx) {
-          const remainMM = pdfPageHeight - cursorY - margin;
-          const sliceHeightPx = Math.min(remainMM * pxPerMM, srcHeightPx - srcY);
-          const sliceHeightMM = sliceHeightPx / pxPerMM;
-
-          // Create a slice canvas
-          const sliceCanvas = document.createElement('canvas');
-          sliceCanvas.width = canvas.width;
-          sliceCanvas.height = Math.ceil(sliceHeightPx);
-          const ctx = sliceCanvas.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-          ctx.drawImage(canvas, 0, srcY, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
-
-          const sliceImg = sliceCanvas.toDataURL('image/png');
-          pdf.addImage(sliceImg, 'PNG', margin, cursorY, imgWidthMM, sliceHeightMM);
-
-          srcY += sliceHeightPx;
-          if (srcY < srcHeightPx) {
-            pdf.addPage();
-            cursorY = margin;
-          } else {
-            cursorY += sliceHeightMM + 4;
-          }
-        }
-      } else {
-        pdf.addImage(imgData, 'PNG', margin, cursorY, imgWidthMM, imgHeightMM);
-        cursorY += imgHeightMM + 4;
-      }
+      pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidthMM, sliceHeightMM);
+      srcY += sliceHeightPx;
+      page++;
     }
-
-    document.body.removeChild(pdfContainer);
 
     const dateStr = birthDate ? birthDate.replace(/-/g, '') : 'report';
     pdf.save(`personal-analysis-${dateStr}.pdf`);
