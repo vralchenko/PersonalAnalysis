@@ -47,7 +47,7 @@
     margin-bottom: 30px;
   }
   .form-row { display: flex; gap: 16px; margin-bottom: 16px; }
-  .form-group { flex: 1; }
+  .form-group { flex: 1; position: relative; }
   .form-group label {
     display: block;
     font-size: 0.85em;
@@ -170,6 +170,16 @@
   .btn-all:hover { transform: translateY(-2px); }
   .btn-all:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+  #placeDropdown .dropdown-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.95em;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  #placeDropdown .dropdown-item:last-child { border-bottom: none; }
+  #placeDropdown .dropdown-item:hover { background: rgba(124,92,252,0.15); }
+
   .footer {
     text-align: center;
     padding: 30px;
@@ -197,11 +207,12 @@
     <div class="form-row">
       <div class="form-group">
         <label>Birth Date</label>
-        <input type="date" id="birthDate" value="1978-10-21">
+        <input type="date" id="birthDate">
       </div>
       <div class="form-group">
         <label>Birth Place</label>
-        <input type="text" id="birthPlace" placeholder="e.g. Chernihiv, Ukraine" value="">
+        <input type="text" id="birthPlace" placeholder="e.g. Chernihiv, Ukraine" autocomplete="off">
+        <div id="placeDropdown" style="display:none; position:absolute; z-index:100; background:var(--card); border:1px solid var(--border); border-radius:10px; width:100%; max-height:200px; overflow-y:auto; margin-top:2px;"></div>
       </div>
     </div>
     <div class="form-group" style="margin-bottom: 16px;">
@@ -240,11 +251,45 @@
 
   <div class="footer">
     <p>Powered by generational psychology, sociology & economics. No astrology.</p>
-    <p>Built by <a href="https://www.linkedin.com/in/vralchenko/">Viktor Ralchenko</a> | <a href="https://vralchenko-portfolio.pages.dev">Portfolio</a> | <a href="https://github.com/vralchenko/PersonalAnalysis">GitHub</a></p>
+    <p>Built by <a href="https://www.linkedin.com/in/victoralchenko/" target="_blank">Viktor Ralchenko</a> | <a href="https://vralchenko-portfolio.pages.dev/ru/projects" target="_blank">Portfolio</a></p>
   </div>
 </div>
 
 <script>
+// Place autocomplete
+(function() {
+  const input = document.getElementById('birthPlace');
+  const dropdown = document.getElementById('placeDropdown');
+  let timer = null;
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    const q = this.value.trim();
+    if (q.length < 2) { dropdown.style.display = 'none'; return; }
+    timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=5&featuretype=city,town,village`);
+        const data = await res.json();
+        const items = [...new Set(data.map(item => {
+          const city = item.address.city || item.address.town || item.address.village || '';
+          const country = item.address.country || '';
+          return city && country ? `${city}, ${country}` : item.display_name.split(',').slice(0, 2).join(',').trim();
+        }).filter(Boolean))];
+        if (items.length === 0) { dropdown.style.display = 'none'; return; }
+        dropdown.innerHTML = items.map(i => `<div class="dropdown-item">${i}</div>`).join('');
+        dropdown.style.display = 'block';
+        dropdown.querySelectorAll('.dropdown-item').forEach(el => {
+          el.addEventListener('click', () => { input.value = el.textContent; dropdown.style.display = 'none'; });
+        });
+      } catch(e) { dropdown.style.display = 'none'; }
+    }, 400);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
+  });
+})();
+
 const SECTIONS = {
   childhood: 'Childhood Context Decoder',
   personality: 'Personality Evolution Map',
@@ -262,7 +307,10 @@ function selectSection(el) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   currentSection = el.dataset.section;
-  showResults();
+  // Hide all cards, show only the selected one
+  document.querySelectorAll('.result-card').forEach(c => c.classList.remove('visible'));
+  const card = document.getElementById(`result-${currentSection}`);
+  if (card) card.classList.add('visible');
 }
 
 function showResults() {
@@ -377,6 +425,8 @@ async function generateSection() {
   const btn = document.getElementById('btnGenerate');
   btn.disabled = true;
   btn.textContent = 'Generating...';
+  // Hide all other result cards, show only the selected one
+  document.querySelectorAll('.result-card').forEach(c => c.classList.remove('visible'));
   await streamSection(currentSection);
   btn.disabled = false;
   btn.textContent = 'Generate Selected Analysis';
