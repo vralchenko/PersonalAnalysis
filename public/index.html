@@ -22,8 +22,10 @@
     color: var(--text);
     line-height: 1.7;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
-  .container { max-width: 800px; margin: 0 auto; padding: 10px 20px; }
+  .container { max-width: 800px; margin: 0 auto; padding: 10px 20px; flex: 1; display: flex; flex-direction: column; }
 
   header {
     text-align: center;
@@ -183,6 +185,7 @@
   .footer {
     text-align: center;
     padding: 14px;
+    margin-top: auto;
     color: var(--muted);
     font-size: 0.85em;
   }
@@ -251,7 +254,7 @@
 
   <div class="footer">
     <p>Powered by generational psychology, sociology & economics. No astrology.</p>
-    <p>Built by <a href="https://www.linkedin.com/in/victoralchenko/" target="_blank">Viktor Ralchenko</a> | <a href="https://vralchenko-portfolio.pages.dev/ru/projects" target="_blank">Portfolio</a></p>
+    <p>Built by <a href="https://www.linkedin.com/in/victoralchenko/" target="_blank">Viktor Ralchenko</a> | <a href="https://vralchenko-portfolio.pages.dev/en/projects" target="_blank">Portfolio</a></p>
   </div>
 </div>
 
