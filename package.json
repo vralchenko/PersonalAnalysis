@@ -1,0 +1,12 @@
+{
+  "name": "personal-analysis",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev public --binding GROQ_API_KEY=your_key_here",
+    "deploy": "wrangler pages deploy public --project-name=personal-analysis"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
