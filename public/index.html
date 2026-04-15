@@ -493,16 +493,16 @@ async function downloadPDF() {
   try {
     // Build a temporary container with all results for PDF
     const pdfContainer = document.createElement('div');
-    pdfContainer.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px;background:#0a0a0f;color:#e8e6f0;padding:40px;font-family:Inter,system-ui,sans-serif;line-height:1.8;';
+    pdfContainer.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px;background:#ffffff;color:#1a1a1a;padding:50px;font-family:Inter,system-ui,sans-serif;line-height:1.8;';
 
     const birthDate = document.getElementById('birthDate').value;
     const birthPlace = document.getElementById('birthPlace').value;
 
     // Header
     pdfContainer.innerHTML = `
-      <div style="text-align:center;margin-bottom:30px;">
-        <h1 style="color:#a78bfa;font-size:2em;margin-bottom:8px;">Personal Analysis</h1>
-        <p style="color:#8888a8;">Birth: ${birthDate ? new Date(birthDate).toLocaleDateString('en-GB') : '—'} | ${birthPlace || '—'}</p>
+      <div style="text-align:center;margin-bottom:40px;padding-bottom:20px;border-bottom:2px solid #e0e0e0;">
+        <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">Personal Analysis</h1>
+        <p style="color:#666;">Birth: ${birthDate ? new Date(birthDate).toLocaleDateString('en-GB') : '—'} | ${birthPlace || '—'}</p>
       </div>
     `;
 
@@ -510,9 +510,9 @@ async function downloadPDF() {
     Object.keys(SECTIONS).forEach(key => {
       if (results[key]) {
         pdfContainer.innerHTML += `
-          <div style="margin-bottom:24px;padding:20px;background:#12121f;border:1px solid #1e1e35;border-radius:12px;">
-            <h2 style="color:#a78bfa;font-size:1.3em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e1e35;">${SECTIONS[key]}</h2>
-            <div style="white-space:pre-wrap;line-height:1.8;">${formatText(results[key])}</div>
+          <div style="margin-bottom:28px;padding:24px;background:#f9f9fb;border:1px solid #e0e0e0;border-radius:10px;">
+            <h2 style="color:#5b3cc4;font-size:1.3em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e0e0e0;">${SECTIONS[key]}</h2>
+            <div style="white-space:pre-wrap;line-height:1.8;text-align:justify;color:#2a2a2a;">${formatText(results[key])}</div>
           </div>
         `;
       }
@@ -522,7 +522,7 @@ async function downloadPDF() {
 
     const canvas = await html2canvas(pdfContainer, {
       scale: 2,
-      backgroundColor: '#0a0a0f',
+      backgroundColor: '#ffffff',
       logging: false,
       useCORS: true,
     });
