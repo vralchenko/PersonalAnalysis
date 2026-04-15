@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Personal Analysis — Generational Psychology Profile</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg: #0a0a0f;
@@ -172,6 +174,23 @@
   .btn-all:hover { transform: translateY(-2px); }
   .btn-all:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+  .btn-pdf {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95em;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: all 0.3s;
+    display: none;
+  }
+  .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(220,38,38,0.3); }
+  .btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
   #placeDropdown .dropdown-item {
     padding: 10px 16px;
     cursor: pointer;
@@ -250,6 +269,7 @@
     </div>
   </div>
 
+  <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">📄 Download PDF</button>
   <div id="results"></div>
 
   <div class="footer">
@@ -414,6 +434,7 @@ async function streamSection(section) {
     }
 
     results[section] = text;
+    showPdfButton();
 
     // Mark nav button as done
     const navBtn = document.querySelector(`.nav-btn[data-section="${section}"]`);
@@ -455,6 +476,89 @@ async function generateAll() {
 
   // Show all results
   document.querySelectorAll('.result-card').forEach(c => c.classList.add('visible'));
+  document.getElementById('btnPdf').style.display = 'block';
+}
+
+function showPdfButton() {
+  if (Object.keys(results).length > 0) {
+    document.getElementById('btnPdf').style.display = 'block';
+  }
+}
+
+async function downloadPDF() {
+  const btn = document.getElementById('btnPdf');
+  btn.disabled = true;
+  btn.textContent = 'Generating PDF...';
+
+  try {
+    // Build a temporary container with all results for PDF
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px;background:#0a0a0f;color:#e8e6f0;padding:40px;font-family:Inter,system-ui,sans-serif;line-height:1.8;';
+
+    const birthDate = document.getElementById('birthDate').value;
+    const birthPlace = document.getElementById('birthPlace').value;
+
+    // Header
+    pdfContainer.innerHTML = `
+      <div style="text-align:center;margin-bottom:30px;">
+        <h1 style="color:#a78bfa;font-size:2em;margin-bottom:8px;">Personal Analysis</h1>
+        <p style="color:#8888a8;">Birth: ${birthDate ? new Date(birthDate).toLocaleDateString('en-GB') : '—'} | ${birthPlace || '—'}</p>
+      </div>
+    `;
+
+    // Add all generated sections
+    Object.keys(SECTIONS).forEach(key => {
+      if (results[key]) {
+        pdfContainer.innerHTML += `
+          <div style="margin-bottom:24px;padding:20px;background:#12121f;border:1px solid #1e1e35;border-radius:12px;">
+            <h2 style="color:#a78bfa;font-size:1.3em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e1e35;">${SECTIONS[key]}</h2>
+            <div style="white-space:pre-wrap;line-height:1.8;">${formatText(results[key])}</div>
+          </div>
+        `;
+      }
+    });
+
+    document.body.appendChild(pdfContainer);
+
+    const canvas = await html2canvas(pdfContainer, {
+      scale: 2,
+      backgroundColor: '#0a0a0f',
+      logging: false,
+      useCORS: true,
+    });
+
+    document.body.removeChild(pdfContainer);
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfPageHeight = pdf.internal.pageSize.getHeight();
+    const imgData = canvas.toDataURL('image/png');
+    const imgHeightMM = (canvas.height * pdfWidth) / canvas.width;
+
+    let heightLeft = imgHeightMM;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightMM);
+    heightLeft -= pdfPageHeight;
+
+    while (heightLeft > 0) {
+      pdf.addPage();
+      position = heightLeft - imgHeightMM;
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightMM);
+      heightLeft -= pdfPageHeight;
+    }
+
+    const dateStr = birthDate ? birthDate.replace(/-/g, '') : 'report';
+    pdf.save(`personal-analysis-${dateStr}.pdf`);
+
+  } catch (error) {
+    console.error('PDF error:', error);
+    alert('Failed to generate PDF: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📄 Download PDF';
+  }
 }
 </script>
 
