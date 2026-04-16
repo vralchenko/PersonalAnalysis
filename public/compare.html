@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Personal Analysis — Generational Psychology Profile</title>
+<title>Compatibility Analysis — How two people fit together</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <style>
@@ -27,7 +27,7 @@
     display: flex;
     flex-direction: column;
   }
-  .container { max-width: 800px; margin: 0 auto; padding: 10px 20px; flex: 1; display: flex; flex-direction: column; }
+  .container { max-width: 960px; margin: 0 auto; padding: 10px 20px; flex: 1; display: flex; flex-direction: column; }
 
   header {
     text-align: center;
@@ -43,18 +43,29 @@
   header p { color: var(--muted); font-size: 0.9em; }
 
   /* Form */
+  .people-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
   .form-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 20px 28px;
-    margin-bottom: 16px;
+    padding: 18px 22px;
   }
-  .form-row { display: flex; gap: 12px; margin-bottom: 10px; }
-  .form-group { flex: 1; position: relative; }
+  .form-card h3 {
+    color: var(--accent2);
+    font-size: 1em;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-group { position: relative; margin-bottom: 10px; }
   .form-group label {
     display: block;
-    font-size: 0.85em;
+    font-size: 0.8em;
     color: var(--muted);
     margin-bottom: 6px;
     font-weight: 600;
@@ -78,6 +89,13 @@
   }
   textarea { resize: vertical; min-height: 40px; }
 
+  .actions-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
   .btn-generate {
     width: 100%;
     padding: 12px;
@@ -95,10 +113,10 @@
   .btn-generate:active { transform: translateY(0); }
   .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  /* Sections nav */
+  /* Dimensions nav */
   .sections-nav {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 8px;
     margin-bottom: 14px;
   }
@@ -191,15 +209,15 @@
   .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(220,38,38,0.3); }
   .btn-pdf:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  #placeDropdown .dropdown-item {
+  .place-dropdown .dropdown-item {
     padding: 10px 16px;
     cursor: pointer;
     font-size: 0.95em;
     color: var(--text);
     border-bottom: 1px solid var(--border);
   }
-  #placeDropdown .dropdown-item:last-child { border-bottom: none; }
-  #placeDropdown .dropdown-item:hover { background: rgba(124,92,252,0.15); }
+  .place-dropdown .dropdown-item:last-child { border-bottom: none; }
+  .place-dropdown .dropdown-item:hover { background: rgba(124,92,252,0.15); }
 
   .footer {
     text-align: center;
@@ -210,9 +228,9 @@
   }
   .footer a { color: var(--accent2); text-decoration: none; }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     header h1 { font-size: 1.6em; }
-    .form-row { flex-direction: column; gap: 12px; }
+    .people-grid { grid-template-columns: 1fr; }
     .sections-nav { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
@@ -220,57 +238,76 @@
 <body>
 
 <header>
-  <h1>Personal Analysis</h1>
-  <p>Generational psychology profile based on your birth date and place</p>
+  <h1>Compatibility Analysis</h1>
+  <p>How two people fit together — across love, family, business, work, and friendship</p>
 </header>
 
 <div class="container">
   <p style="text-align:center; margin-top:-8px; margin-bottom:14px;">
-    <a href="/compare.html" style="color:var(--accent2);">Compare two people →</a>
+    <a href="/index.html" style="color:var(--accent2);">← Back to single-person analysis</a>
   </p>
-  <div class="form-card">
-    <div class="form-row">
+
+  <div class="people-grid">
+    <div class="form-card">
+      <h3>Person A</h3>
       <div class="form-group">
         <label>Birth Date</label>
-        <input type="text" id="birthDate" placeholder="dd.mm.yyyy" inputmode="numeric" maxlength="10" autocomplete="off">
+        <input type="text" id="dateA" placeholder="dd.mm.yyyy" inputmode="numeric" maxlength="10" autocomplete="off">
       </div>
       <div class="form-group">
         <label>Birth Place</label>
-        <input type="text" id="birthPlace" placeholder="e.g. Chernihiv, Ukraine" autocomplete="off">
-        <div id="placeDropdown" style="display:none; position:absolute; z-index:100; background:var(--card); border:1px solid var(--border); border-radius:10px; width:100%; max-height:200px; overflow-y:auto; margin-top:2px;"></div>
+        <input type="text" id="placeA" placeholder="e.g. Chernihiv, Ukraine" autocomplete="off">
+        <div id="dropdownA" class="place-dropdown" style="display:none; position:absolute; z-index:100; background:var(--card); border:1px solid var(--border); border-radius:10px; width:100%; max-height:200px; overflow-y:auto; margin-top:2px;"></div>
+      </div>
+      <div class="form-group">
+        <label>Additional Context (optional)</label>
+        <textarea id="extraA" placeholder="Parents background, siblings, status..."></textarea>
       </div>
     </div>
-    <div class="form-group" style="margin-bottom: 8px;">
-      <label>Additional Context (optional)</label>
-      <textarea id="extraInfo" placeholder="Parents background, siblings, family status, anything relevant..."></textarea>
+
+    <div class="form-card">
+      <h3>Person B</h3>
+      <div class="form-group">
+        <label>Birth Date</label>
+        <input type="text" id="dateB" placeholder="dd.mm.yyyy" inputmode="numeric" maxlength="10" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Birth Place</label>
+        <input type="text" id="placeB" placeholder="e.g. Tbilisi, Georgia" autocomplete="off">
+        <div id="dropdownB" class="place-dropdown" style="display:none; position:absolute; z-index:100; background:var(--card); border:1px solid var(--border); border-radius:10px; width:100%; max-height:200px; overflow-y:auto; margin-top:2px;"></div>
+      </div>
+      <div class="form-group">
+        <label>Additional Context (optional)</label>
+        <textarea id="extraB" placeholder="Parents background, siblings, status..."></textarea>
+      </div>
     </div>
-    <button class="btn-generate" id="btnGenerate" onclick="generateSection()">Generate Childhood Analysis</button>
-    <button class="btn-all" id="btnAll" onclick="generateAll()">Generate Full Report (all 7 sections)</button>
   </div>
 
-  <p style="text-align:center; color:var(--muted); font-size:0.8em; margin-bottom:6px;">Click to select one or several sections</p>
+  <p style="text-align:center; color:var(--muted); font-size:0.8em; margin-bottom:6px;">Click to select one or several dimensions</p>
   <div class="sections-nav" id="sectionsNav">
-    <div class="nav-btn active" data-section="childhood" onclick="toggleSection(this)">
-      <span class="icon">�</span>Childhood
+    <div class="nav-btn active" data-section="love" onclick="toggleSection(this)">
+      <span class="icon">♡</span>Love
     </div>
-    <div class="nav-btn" data-section="personality" onclick="toggleSection(this)">
-      <span class="icon">꩜</span>Personality
+    <div class="nav-btn" data-section="family" onclick="toggleSection(this)">
+      <span class="icon">⌂</span>Family
     </div>
-    <div class="nav-btn" data-section="career" onclick="toggleSection(this)">
-      <span class="icon">⚡</span>Career
+    <div class="nav-btn" data-section="business" onclick="toggleSection(this)">
+      <span class="icon">$</span>Business
     </div>
-    <div class="nav-btn" data-section="relationships" onclick="toggleSection(this)">
-      <span class="icon">♡</span>Relationships
+    <div class="nav-btn" data-section="work" onclick="toggleSection(this)">
+      <span class="icon">⚡</span>Work
     </div>
-    <div class="nav-btn" data-section="money" onclick="toggleSection(this)">
-      <span class="icon">$</span>Money
+    <div class="nav-btn" data-section="friendship" onclick="toggleSection(this)">
+      <span class="icon">✦</span>Friendship
     </div>
-    <div class="nav-btn" data-section="struggles" onclick="toggleSection(this)">
-      <span class="icon">◉</span>Struggles
+    <div class="nav-btn" data-section="overall" onclick="toggleSection(this)">
+      <span class="icon">◎</span>Overall
     </div>
-    <div class="nav-btn" data-section="roadmap" onclick="toggleSection(this)">
-      <span class="icon">▷</span>Roadmap
-    </div>
+  </div>
+
+  <div class="actions-card">
+    <button class="btn-generate" id="btnGenerate" onclick="generateSection()">Generate Love Comparison</button>
+    <button class="btn-all" id="btnAll" onclick="generateAll()">Generate Full Compatibility Report (all 6)</button>
   </div>
 
   <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">📄 Download PDF</button>
@@ -284,21 +321,23 @@
 
 <script>
 // Birth date keyboard input — auto-insert dots (dd.mm.yyyy)
-(function() {
-  const dateInput = document.getElementById('birthDate');
-  dateInput.addEventListener('input', function(e) {
+function attachDateMask(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', function() {
     let v = this.value.replace(/\D/g, '').slice(0, 8);
     let out = v;
     if (v.length > 4) out = v.slice(0, 2) + '.' + v.slice(2, 4) + '.' + v.slice(4);
     else if (v.length > 2) out = v.slice(0, 2) + '.' + v.slice(2);
     this.value = out;
   });
-})();
+}
+attachDateMask('dateA');
+attachDateMask('dateB');
 
-// Place autocomplete
-(function() {
-  const input = document.getElementById('birthPlace');
-  const dropdown = document.getElementById('placeDropdown');
+// Place autocomplete — attach to an input + dropdown pair
+function attachPlaceAutocomplete(inputId, dropdownId) {
+  const input = document.getElementById(inputId);
+  const dropdown = document.getElementById(dropdownId);
   let timer = null;
 
   input.addEventListener('input', function() {
@@ -327,34 +366,33 @@
   document.addEventListener('click', function(e) {
     if (!input.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
   });
-})();
+}
+attachPlaceAutocomplete('placeA', 'dropdownA');
+attachPlaceAutocomplete('placeB', 'dropdownB');
 
-const SECTIONS = {
-  childhood: 'Childhood Context Decoder',
-  personality: 'Personality Evolution Map',
-  career: 'Career Compass',
-  relationships: 'Relationship Pattern Scan',
-  money: 'Money Mindset Matrix',
-  struggles: 'Hidden Struggle Finder',
-  roadmap: 'Life Roadmap'
+const DIMENSIONS = {
+  love: 'Romantic Compatibility',
+  family: 'Family Compatibility',
+  business: 'Business Partnership',
+  work: 'Work Collaboration',
+  friendship: 'Friendship Compatibility',
+  overall: 'Overall Compatibility'
 };
 
-const SECTION_SHORT = {
-  childhood: 'Childhood',
-  personality: 'Personality',
-  career: 'Career',
-  relationships: 'Relationships',
-  money: 'Money',
-  struggles: 'Struggles',
-  roadmap: 'Roadmap'
+const DIMENSION_SHORT = {
+  love: 'Love',
+  family: 'Family',
+  business: 'Business',
+  work: 'Work',
+  friendship: 'Friendship',
+  overall: 'Overall'
 };
 
-const selectedSections = new Set(['childhood']);
+const selectedSections = new Set(['love']);
 const results = {};
 
 function getSelectedSections() {
-  // Return in canonical SECTIONS order
-  return Object.keys(SECTIONS).filter(k => selectedSections.has(k));
+  return Object.keys(DIMENSIONS).filter(k => selectedSections.has(k));
 }
 
 function updateGenerateBtnLabel() {
@@ -362,16 +400,15 @@ function updateGenerateBtnLabel() {
   if (!btn || btn.disabled) return;
   const sel = getSelectedSections();
   if (sel.length === 0) {
-    btn.textContent = 'Select a section above';
+    btn.textContent = 'Select a dimension above';
   } else if (sel.length === 1) {
-    btn.textContent = `Generate ${SECTION_SHORT[sel[0]]} Analysis`;
+    btn.textContent = `Generate ${DIMENSION_SHORT[sel[0]]} Comparison`;
   } else {
-    btn.textContent = `Generate Selected (${sel.length} sections)`;
+    btn.textContent = `Generate Selected (${sel.length} dimensions)`;
   }
 }
 
 function syncCardVisibility() {
-  // Show only result cards for currently selected sections
   document.querySelectorAll('.result-card').forEach(c => c.classList.remove('visible'));
   getSelectedSections().forEach(key => {
     const card = document.getElementById(`result-${key}`);
@@ -382,7 +419,6 @@ function syncCardVisibility() {
 function toggleSection(el) {
   const key = el.dataset.section;
   if (selectedSections.has(key)) {
-    // Don't allow deselecting the last one
     if (selectedSections.size === 1) return;
     selectedSections.delete(key);
     el.classList.remove('active');
@@ -394,25 +430,6 @@ function toggleSection(el) {
   syncCardVisibility();
 }
 
-function showResults() {
-  const container = document.getElementById('results');
-  container.innerHTML = '';
-  Object.keys(SECTIONS).forEach(key => {
-    if (results[key]) {
-      const card = document.createElement('div');
-      card.className = 'result-card' + (selectedSections.has(key) ? ' visible' : '');
-      card.innerHTML = `<h2>${SECTIONS[key]}</h2><div class="result-content">${formatText(results[key])}</div>`;
-      container.appendChild(card);
-    }
-  });
-  // Show current if exists
-  const current = container.querySelector('.result-card.visible');
-  if (!current) {
-    const first = container.querySelector('.result-card');
-    if (first) first.classList.add('visible');
-  }
-}
-
 function formatText(text) {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -422,34 +439,45 @@ function formatText(text) {
     .replace(/^/, '<p>').replace(/$/, '</p>');
 }
 
-async function streamSection(section) {
-  const birthDate = document.getElementById('birthDate').value.trim();
-  const birthPlace = document.getElementById('birthPlace').value;
-  const extraInfo = document.getElementById('extraInfo').value;
+function readPerson(prefix) {
+  return {
+    date: document.getElementById(`date${prefix}`).value.trim(),
+    place: document.getElementById(`place${prefix}`).value.trim(),
+    extra: document.getElementById(`extra${prefix}`).value.trim()
+  };
+}
 
-  if (!/^\d{2}\.\d{2}\.\d{4}$/.test(birthDate) || !birthPlace) {
-    alert('Please fill in birth date (dd.mm.yyyy) and place');
-    return;
+function validatePeople(p1, p2) {
+  const dateOk = /^\d{2}\.\d{2}\.\d{4}$/;
+  if (!dateOk.test(p1.date) || !p1.place || !dateOk.test(p2.date) || !p2.place) {
+    alert("Please fill in both people's birth date (dd.mm.yyyy) and place");
+    return false;
   }
+  return true;
+}
+
+async function streamSection(dimension) {
+  const person1 = readPerson('A');
+  const person2 = readPerson('B');
+  if (!validatePeople(person1, person2)) return false;
 
   const container = document.getElementById('results');
 
-  // Show loading
-  let card = document.getElementById(`result-${section}`);
+  let card = document.getElementById(`result-${dimension}`);
   if (!card) {
     card = document.createElement('div');
-    card.id = `result-${section}`;
+    card.id = `result-${dimension}`;
     card.className = 'result-card visible';
     container.appendChild(card);
   }
   card.className = 'result-card visible';
-  card.innerHTML = `<h2>${SECTIONS[section]}</h2><div class="loading"><div class="spinner"></div>Analyzing...</div>`;
+  card.innerHTML = `<h2>${DIMENSIONS[dimension]}</h2><div class="loading"><div class="spinner"></div>Analyzing...</div>`;
 
   try {
-    const res = await fetch('/api/analyze', {
+    const res = await fetch('/api/compare', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ birthDate, birthPlace, section, extraInfo })
+      body: JSON.stringify({ person1, person2, dimension })
     });
 
     if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -459,8 +487,8 @@ async function streamSection(section) {
     let text = '';
     let buffer = '';
 
-    card.innerHTML = `<h2>${SECTIONS[section]}</h2><div class="result-content" id="content-${section}"></div>`;
-    const contentEl = document.getElementById(`content-${section}`);
+    card.innerHTML = `<h2>${DIMENSIONS[dimension]}</h2><div class="result-content" id="content-${dimension}"></div>`;
+    const contentEl = document.getElementById(`content-${dimension}`);
 
     while (true) {
       const { done, value } = await reader.read();
@@ -486,15 +514,16 @@ async function streamSection(section) {
       }
     }
 
-    results[section] = text;
+    results[dimension] = text;
     showPdfButton();
 
-    // Mark nav button as done
-    const navBtn = document.querySelector(`.nav-btn[data-section="${section}"]`);
+    const navBtn = document.querySelector(`.nav-btn[data-section="${dimension}"]`);
     if (navBtn) navBtn.classList.add('done');
+    return true;
 
   } catch (error) {
-    card.innerHTML = `<h2>${SECTIONS[section]}</h2><p style="color:#ef4444;">Error: ${error.message}</p>`;
+    card.innerHTML = `<h2>${DIMENSIONS[dimension]}</h2><p style="color:#ef4444;">Error: ${error.message}</p>`;
+    return false;
   }
 }
 
@@ -503,16 +532,20 @@ async function generateSection() {
   const sel = getSelectedSections();
   if (sel.length === 0) return;
 
+  // Validate once up-front so the alert fires before disabling the button
+  const p1 = readPerson('A');
+  const p2 = readPerson('B');
+  if (!validatePeople(p1, p2)) return;
+
   btn.disabled = true;
-  // Hide cards for sections that are no longer selected
   document.querySelectorAll('.result-card').forEach(c => c.classList.remove('visible'));
 
   for (let i = 0; i < sel.length; i++) {
-    const section = sel[i];
+    const dim = sel[i];
     btn.textContent = sel.length === 1
-      ? `Generating ${SECTION_SHORT[section]}...`
-      : `Generating ${SECTION_SHORT[section]} (${i + 1}/${sel.length})...`;
-    await streamSection(section);
+      ? `Generating ${DIMENSION_SHORT[dim]}...`
+      : `Generating ${DIMENSION_SHORT[dim]} (${i + 1}/${sel.length})...`;
+    await streamSection(dim);
   }
 
   btn.disabled = false;
@@ -522,16 +555,20 @@ async function generateSection() {
 async function generateAll() {
   const btn = document.getElementById('btnAll');
   const btnGen = document.getElementById('btnGenerate');
+
+  const p1 = readPerson('A');
+  const p2 = readPerson('B');
+  if (!validatePeople(p1, p2)) return;
+
   btn.disabled = true;
   btnGen.disabled = true;
   btn.textContent = 'Generating full report...';
 
-  // Mark every section as selected so the UI is consistent
   selectedSections.clear();
-  Object.keys(SECTIONS).forEach(s => selectedSections.add(s));
+  Object.keys(DIMENSIONS).forEach(d => selectedSections.add(d));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('active'));
 
-  const all = Object.keys(SECTIONS);
+  const all = Object.keys(DIMENSIONS);
   for (let i = 0; i < all.length; i++) {
     btn.textContent = `Generating full report (${i + 1}/${all.length})...`;
     await streamSection(all[i]);
@@ -539,10 +576,9 @@ async function generateAll() {
 
   btn.disabled = false;
   btnGen.disabled = false;
-  btn.textContent = 'Generate Full Report (all 7 sections)';
+  btn.textContent = 'Generate Full Compatibility Report (all 6)';
   updateGenerateBtnLabel();
 
-  // Show all results
   document.querySelectorAll('.result-card').forEach(c => c.classList.add('visible'));
   document.getElementById('btnPdf').style.display = 'block';
 }
@@ -559,20 +595,18 @@ async function downloadPDF() {
   btn.textContent = 'Generating PDF...';
 
   try {
-    // Build a temporary container with all results for PDF
     const pdfContainer = document.createElement('div');
     pdfContainer.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px;background:#ffffff;color:#1a1a1a;padding:50px;font-family:Inter,system-ui,sans-serif;line-height:1.8;';
 
-    const birthDate = document.getElementById('birthDate').value;
-    const birthPlace = document.getElementById('birthPlace').value;
+    const p1 = readPerson('A');
+    const p2 = readPerson('B');
 
-    // Build all sections into one flow
     let sectionsHTML = '';
-    Object.keys(SECTIONS).forEach(key => {
+    Object.keys(DIMENSIONS).forEach(key => {
       if (results[key]) {
         sectionsHTML += `
           <div style="margin-bottom:28px;padding:24px;background:#f9f9fb;border:1px solid #e0e0e0;border-radius:10px;">
-            <h2 style="color:#5b3cc4;font-size:1.3em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e0e0e0;">${SECTIONS[key]}</h2>
+            <h2 style="color:#5b3cc4;font-size:1.3em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e0e0e0;">${DIMENSIONS[key]}</h2>
             <div style="white-space:pre-wrap;line-height:1.8;text-align:justify;color:#2a2a2a;">${formatText(results[key])}</div>
           </div>
         `;
@@ -581,8 +615,11 @@ async function downloadPDF() {
 
     pdfContainer.innerHTML = `
       <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #e0e0e0;">
-        <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">Personal Analysis</h1>
-        <p style="color:#666;">Birth: ${birthDate || '—'} | ${birthPlace || '—'}</p>
+        <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">Compatibility Analysis</h1>
+        <div style="display:flex;justify-content:center;gap:30px;color:#666;font-size:0.95em;">
+          <div><strong style="color:#5b3cc4;">Person A</strong><br>${p1.date || '—'} | ${p1.place || '—'}</div>
+          <div><strong style="color:#5b3cc4;">Person B</strong><br>${p2.date || '—'} | ${p2.place || '—'}</div>
+        </div>
       </div>
       ${sectionsHTML}
     `;
@@ -630,8 +667,10 @@ async function downloadPDF() {
       page++;
     }
 
-    const dateStr = birthDate ? birthDate.replace(/\./g, '') : 'report';
-    pdf.save(`personal-analysis-${dateStr}.pdf`);
+    const dateStr = (p1.date && p2.date)
+      ? `${p1.date.replace(/\./g, '')}-${p2.date.replace(/\./g, '')}`
+      : 'report';
+    pdf.save(`compatibility-${dateStr}.pdf`);
 
   } catch (error) {
     console.error('PDF error:', error);
