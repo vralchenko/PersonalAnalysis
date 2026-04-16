@@ -229,7 +229,7 @@
     <div class="form-row">
       <div class="form-group">
         <label>Birth Date</label>
-        <input type="date" id="birthDate">
+        <input type="text" id="birthDate" placeholder="dd.mm.yyyy" inputmode="numeric" maxlength="10" autocomplete="off">
       </div>
       <div class="form-group">
         <label>Birth Place</label>
@@ -241,30 +241,31 @@
       <label>Additional Context (optional)</label>
       <textarea id="extraInfo" placeholder="Parents background, siblings, family status, anything relevant..."></textarea>
     </div>
-    <button class="btn-generate" id="btnGenerate" onclick="generateSection()">Generate Selected Analysis</button>
+    <button class="btn-generate" id="btnGenerate" onclick="generateSection()">Generate Childhood Analysis</button>
     <button class="btn-all" id="btnAll" onclick="generateAll()">Generate Full Report (all 7 sections)</button>
   </div>
 
+  <p style="text-align:center; color:var(--muted); font-size:0.8em; margin-bottom:6px;">Click to select one or several sections</p>
   <div class="sections-nav" id="sectionsNav">
-    <div class="nav-btn active" data-section="childhood" onclick="selectSection(this)">
+    <div class="nav-btn active" data-section="childhood" onclick="toggleSection(this)">
       <span class="icon">�</span>Childhood
     </div>
-    <div class="nav-btn" data-section="personality" onclick="selectSection(this)">
+    <div class="nav-btn" data-section="personality" onclick="toggleSection(this)">
       <span class="icon">꩜</span>Personality
     </div>
-    <div class="nav-btn" data-section="career" onclick="selectSection(this)">
+    <div class="nav-btn" data-section="career" onclick="toggleSection(this)">
       <span class="icon">⚡</span>Career
     </div>
-    <div class="nav-btn" data-section="relationships" onclick="selectSection(this)">
+    <div class="nav-btn" data-section="relationships" onclick="toggleSection(this)">
       <span class="icon">♡</span>Relationships
     </div>
-    <div class="nav-btn" data-section="money" onclick="selectSection(this)">
+    <div class="nav-btn" data-section="money" onclick="toggleSection(this)">
       <span class="icon">$</span>Money
     </div>
-    <div class="nav-btn" data-section="struggles" onclick="selectSection(this)">
+    <div class="nav-btn" data-section="struggles" onclick="toggleSection(this)">
       <span class="icon">◉</span>Struggles
     </div>
-    <div class="nav-btn" data-section="roadmap" onclick="selectSection(this)">
+    <div class="nav-btn" data-section="roadmap" onclick="toggleSection(this)">
       <span class="icon">▷</span>Roadmap
     </div>
   </div>
@@ -279,6 +280,18 @@
 </div>
 
 <script>
+// Birth date keyboard input — auto-insert dots (dd.mm.yyyy)
+(function() {
+  const dateInput = document.getElementById('birthDate');
+  dateInput.addEventListener('input', function(e) {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    let out = v;
+    if (v.length > 4) out = v.slice(0, 2) + '.' + v.slice(2, 4) + '.' + v.slice(4);
+    else if (v.length > 2) out = v.slice(0, 2) + '.' + v.slice(2);
+    this.value = out;
+  });
+})();
+
 // Place autocomplete
 (function() {
   const input = document.getElementById('birthPlace');
@@ -323,17 +336,59 @@ const SECTIONS = {
   roadmap: 'Life Roadmap'
 };
 
-let currentSection = 'childhood';
+const SECTION_SHORT = {
+  childhood: 'Childhood',
+  personality: 'Personality',
+  career: 'Career',
+  relationships: 'Relationships',
+  money: 'Money',
+  struggles: 'Struggles',
+  roadmap: 'Roadmap'
+};
+
+const selectedSections = new Set(['childhood']);
 const results = {};
 
-function selectSection(el) {
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  currentSection = el.dataset.section;
-  // Hide all cards, show only the selected one
+function getSelectedSections() {
+  // Return in canonical SECTIONS order
+  return Object.keys(SECTIONS).filter(k => selectedSections.has(k));
+}
+
+function updateGenerateBtnLabel() {
+  const btn = document.getElementById('btnGenerate');
+  if (!btn || btn.disabled) return;
+  const sel = getSelectedSections();
+  if (sel.length === 0) {
+    btn.textContent = 'Select a section above';
+  } else if (sel.length === 1) {
+    btn.textContent = `Generate ${SECTION_SHORT[sel[0]]} Analysis`;
+  } else {
+    btn.textContent = `Generate Selected (${sel.length} sections)`;
+  }
+}
+
+function syncCardVisibility() {
+  // Show only result cards for currently selected sections
   document.querySelectorAll('.result-card').forEach(c => c.classList.remove('visible'));
-  const card = document.getElementById(`result-${currentSection}`);
-  if (card) card.classList.add('visible');
+  getSelectedSections().forEach(key => {
+    const card = document.getElementById(`result-${key}`);
+    if (card) card.classList.add('visible');
+  });
+}
+
+function toggleSection(el) {
+  const key = el.dataset.section;
+  if (selectedSections.has(key)) {
+    // Don't allow deselecting the last one
+    if (selectedSections.size === 1) return;
+    selectedSections.delete(key);
+    el.classList.remove('active');
+  } else {
+    selectedSections.add(key);
+    el.classList.add('active');
+  }
+  updateGenerateBtnLabel();
+  syncCardVisibility();
 }
 
 function showResults() {
@@ -342,7 +397,7 @@ function showResults() {
   Object.keys(SECTIONS).forEach(key => {
     if (results[key]) {
       const card = document.createElement('div');
-      card.className = 'result-card' + (key === currentSection ? ' visible' : '');
+      card.className = 'result-card' + (selectedSections.has(key) ? ' visible' : '');
       card.innerHTML = `<h2>${SECTIONS[key]}</h2><div class="result-content">${formatText(results[key])}</div>`;
       container.appendChild(card);
     }
@@ -364,18 +419,13 @@ function formatText(text) {
     .replace(/^/, '<p>').replace(/$/, '</p>');
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
 async function streamSection(section) {
-  const birthDate = formatDate(document.getElementById('birthDate').value);
+  const birthDate = document.getElementById('birthDate').value.trim();
   const birthPlace = document.getElementById('birthPlace').value;
   const extraInfo = document.getElementById('extraInfo').value;
 
-  if (!birthDate || !birthPlace) {
-    alert('Please fill in birth date and place');
+  if (!/^\d{2}\.\d{2}\.\d{4}$/.test(birthDate) || !birthPlace) {
+    alert('Please fill in birth date (dd.mm.yyyy) and place');
     return;
   }
 
@@ -447,13 +497,23 @@ async function streamSection(section) {
 
 async function generateSection() {
   const btn = document.getElementById('btnGenerate');
+  const sel = getSelectedSections();
+  if (sel.length === 0) return;
+
   btn.disabled = true;
-  btn.textContent = 'Generating...';
-  // Hide all other result cards, show only the selected one
+  // Hide cards for sections that are no longer selected
   document.querySelectorAll('.result-card').forEach(c => c.classList.remove('visible'));
-  await streamSection(currentSection);
+
+  for (let i = 0; i < sel.length; i++) {
+    const section = sel[i];
+    btn.textContent = sel.length === 1
+      ? `Generating ${SECTION_SHORT[section]}...`
+      : `Generating ${SECTION_SHORT[section]} (${i + 1}/${sel.length})...`;
+    await streamSection(section);
+  }
+
   btn.disabled = false;
-  btn.textContent = 'Generate Selected Analysis';
+  updateGenerateBtnLabel();
 }
 
 async function generateAll() {
@@ -463,16 +523,21 @@ async function generateAll() {
   btnGen.disabled = true;
   btn.textContent = 'Generating full report...';
 
-  for (const section of Object.keys(SECTIONS)) {
-    currentSection = section;
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.nav-btn[data-section="${section}"]`)?.classList.add('active');
-    await streamSection(section);
+  // Mark every section as selected so the UI is consistent
+  selectedSections.clear();
+  Object.keys(SECTIONS).forEach(s => selectedSections.add(s));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('active'));
+
+  const all = Object.keys(SECTIONS);
+  for (let i = 0; i < all.length; i++) {
+    btn.textContent = `Generating full report (${i + 1}/${all.length})...`;
+    await streamSection(all[i]);
   }
 
   btn.disabled = false;
   btnGen.disabled = false;
   btn.textContent = 'Generate Full Report (all 7 sections)';
+  updateGenerateBtnLabel();
 
   // Show all results
   document.querySelectorAll('.result-card').forEach(c => c.classList.add('visible'));
@@ -514,7 +579,7 @@ async function downloadPDF() {
     pdfContainer.innerHTML = `
       <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #e0e0e0;">
         <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">Personal Analysis</h1>
-        <p style="color:#666;">Birth: ${birthDate ? new Date(birthDate).toLocaleDateString('en-GB') : '—'} | ${birthPlace || '—'}</p>
+        <p style="color:#666;">Birth: ${birthDate || '—'} | ${birthPlace || '—'}</p>
       </div>
       ${sectionsHTML}
     `;
@@ -562,7 +627,7 @@ async function downloadPDF() {
       page++;
     }
 
-    const dateStr = birthDate ? birthDate.replace(/-/g, '') : 'report';
+    const dateStr = birthDate ? birthDate.replace(/\./g, '') : 'report';
     pdf.save(`personal-analysis-${dateStr}.pdf`);
 
   } catch (error) {
