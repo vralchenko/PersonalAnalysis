@@ -58,7 +58,7 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const { person1, person2, dimension } = await request.json();
+    const { person1, person2, dimension, language } = await request.json();
 
     if (!person1?.date || !person1?.place || !person2?.date || !person2?.place || !dimension) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -74,7 +74,7 @@ export async function onRequestPost(context) {
       });
     }
 
-    const systemPrompt = `You are an expert in generational psychology, sociology, and behavioral economics. You analyze compatibility between two people using historical context, cultural environment, and evidence-based behavioral patterns. You NEVER use astrology. Your tone is warm, honest, practical, and empathetic.`;
+    const systemPrompt = `You are an expert in generational psychology, sociology, and behavioral economics. You analyze compatibility between two people using historical context, cultural environment, and evidence-based behavioral patterns. You NEVER use astrology. Your tone is warm, honest, practical, and empathetic.${language === 'ru' ? ' Respond entirely in Russian.' : ''}`;
 
     const userPrompt = buildPrompt(person1, person2, dimension);
 

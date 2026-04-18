@@ -42,6 +42,26 @@
   }
   header p { color: var(--muted); font-size: 0.9em; }
 
+  .lang-switch {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .lang-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 3px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82em;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .lang-btn:hover { border-color: var(--accent); color: var(--text); }
+  .lang-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
   /* Form */
   .people-grid {
     display: grid;
@@ -238,70 +258,74 @@
 <body>
 
 <header>
-  <h1>Compatibility Analysis</h1>
-  <p>How two people fit together — across love, family, business, work, and friendship</p>
+  <h1 id="pageTitle">Compatibility Analysis</h1>
+  <p id="pageSubtitle">How two people fit together — across love, family, business, work, and friendship</p>
 </header>
 
 <div class="container">
-  <p style="text-align:center; margin-top:-8px; margin-bottom:14px;">
-    <a href="/index.html" style="color:var(--accent2);">← Back to single-person analysis</a>
+  <div class="lang-switch">
+    <button class="lang-btn active" id="langEn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="langRu" onclick="setLang('ru')">RU</button>
+  </div>
+  <p style="text-align:center; margin-top:-4px; margin-bottom:14px;">
+    <a href="/index.html" style="color:var(--accent2);" id="backLink">← Back to single-person analysis</a>
   </p>
 
   <div class="people-grid">
     <div class="form-card">
-      <h3>Person A</h3>
+      <h3 id="personATitle">Person A</h3>
       <div class="form-group">
-        <label>Birth Date</label>
+        <label id="labelDateA">Birth Date</label>
         <input type="text" id="dateA" placeholder="dd.mm.yyyy" inputmode="numeric" maxlength="10" autocomplete="off">
       </div>
       <div class="form-group">
-        <label>Birth Place</label>
+        <label id="labelPlaceA">Birth Place</label>
         <input type="text" id="placeA" placeholder="e.g. Chernihiv, Ukraine" autocomplete="off">
         <div id="dropdownA" class="place-dropdown" style="display:none; position:absolute; z-index:100; background:var(--card); border:1px solid var(--border); border-radius:10px; width:100%; max-height:200px; overflow-y:auto; margin-top:2px;"></div>
       </div>
       <div class="form-group">
-        <label>Additional Context (optional)</label>
+        <label id="labelExtraA">Additional Context (optional)</label>
         <textarea id="extraA" placeholder="Parents background, siblings, status..."></textarea>
       </div>
     </div>
 
     <div class="form-card">
-      <h3>Person B</h3>
+      <h3 id="personBTitle">Person B</h3>
       <div class="form-group">
-        <label>Birth Date</label>
+        <label id="labelDateB">Birth Date</label>
         <input type="text" id="dateB" placeholder="dd.mm.yyyy" inputmode="numeric" maxlength="10" autocomplete="off">
       </div>
       <div class="form-group">
-        <label>Birth Place</label>
+        <label id="labelPlaceB">Birth Place</label>
         <input type="text" id="placeB" placeholder="e.g. Tbilisi, Georgia" autocomplete="off">
         <div id="dropdownB" class="place-dropdown" style="display:none; position:absolute; z-index:100; background:var(--card); border:1px solid var(--border); border-radius:10px; width:100%; max-height:200px; overflow-y:auto; margin-top:2px;"></div>
       </div>
       <div class="form-group">
-        <label>Additional Context (optional)</label>
+        <label id="labelExtraB">Additional Context (optional)</label>
         <textarea id="extraB" placeholder="Parents background, siblings, status..."></textarea>
       </div>
     </div>
   </div>
 
-  <p style="text-align:center; color:var(--muted); font-size:0.8em; margin-bottom:6px;">Click to select one or several dimensions</p>
+  <p style="text-align:center; color:var(--muted); font-size:0.8em; margin-bottom:6px;" id="selectHint">Click to select one or several dimensions</p>
   <div class="sections-nav" id="sectionsNav">
     <div class="nav-btn active" data-section="love" onclick="toggleSection(this)">
-      <span class="icon">♡</span>Love
+      <span class="icon">♡</span><span class="nav-label">Love</span>
     </div>
     <div class="nav-btn" data-section="family" onclick="toggleSection(this)">
-      <span class="icon">⌂</span>Family
+      <span class="icon">⌂</span><span class="nav-label">Family</span>
     </div>
     <div class="nav-btn" data-section="business" onclick="toggleSection(this)">
-      <span class="icon">$</span>Business
+      <span class="icon">$</span><span class="nav-label">Business</span>
     </div>
     <div class="nav-btn" data-section="work" onclick="toggleSection(this)">
-      <span class="icon">⚡</span>Work
+      <span class="icon">⚡</span><span class="nav-label">Work</span>
     </div>
     <div class="nav-btn" data-section="friendship" onclick="toggleSection(this)">
-      <span class="icon">✦</span>Friendship
+      <span class="icon">✦</span><span class="nav-label">Friendship</span>
     </div>
     <div class="nav-btn" data-section="overall" onclick="toggleSection(this)">
-      <span class="icon">◎</span>Overall
+      <span class="icon">◎</span><span class="nav-label">Overall</span>
     </div>
   </div>
 
@@ -314,13 +338,168 @@
   <div id="results"></div>
 
   <div class="footer">
-    <p>Powered by generational psychology, sociology & economics. No astrology.</p>
-    <p>Built by <a href="https://www.linkedin.com/in/victoralchenko/" target="_blank">Viktor Ralchenko</a> | <a href="https://vralchenko-portfolio.pages.dev/en/projects" target="_blank">Portfolio</a></p>
+    <p id="footerPowered">Powered by generational psychology, sociology & economics. No astrology.</p>
+    <p><span id="footerBuilt">Built by</span> <a href="https://www.linkedin.com/in/victoralchenko/" target="_blank">Viktor Ralchenko</a> | <a href="https://vralchenko-portfolio.pages.dev/en/projects" target="_blank">Portfolio</a></p>
   </div>
 </div>
 
 <script>
-// Birth date keyboard input — auto-insert dots (dd.mm.yyyy)
+// ─── Translations ───
+const T = {
+  en: {
+    title: 'Compatibility Analysis',
+    subtitle: 'How two people fit together — across love, family, business, work, and friendship',
+    backLink: '← Back to single-person analysis',
+    personA: 'Person A',
+    personB: 'Person B',
+    birthDate: 'Birth Date',
+    birthPlace: 'Birth Place',
+    placePh: 'e.g. Chernihiv, Ukraine',
+    placePh2: 'e.g. Tbilisi, Georgia',
+    extraLabel: 'Additional Context (optional)',
+    extraPh: 'Parents background, siblings, status...',
+    selectHint: 'Click to select one or several dimensions',
+    btnAll: 'Generate Full Compatibility Report (all 6)',
+    btnAllProgress: 'Generating full report...',
+    downloadPdf: '📄 Download PDF',
+    generatingPdf: 'Generating PDF...',
+    footerPowered: 'Powered by generational psychology, sociology & economics. No astrology.',
+    footerBuilt: 'Built by',
+    analyzing: 'Analyzing...',
+    alertFill: "Please fill in both people's birth date (dd.mm.yyyy) and place",
+    pdfTitle: 'Compatibility Analysis',
+    datePh: 'dd.mm.yyyy',
+    dims: {
+      love: 'Romantic Compatibility',
+      family: 'Family Compatibility',
+      business: 'Business Partnership',
+      work: 'Work Collaboration',
+      friendship: 'Friendship Compatibility',
+      overall: 'Overall Compatibility'
+    },
+    short: {
+      love: 'Love',
+      family: 'Family',
+      business: 'Business',
+      work: 'Work',
+      friendship: 'Friendship',
+      overall: 'Overall'
+    },
+    genOne: name => `Generate ${name} Comparison`,
+    genN: n => `Generate Selected (${n} dimensions)`,
+    selectAbove: 'Select a dimension above',
+    progressOne: name => `Generating ${name}...`,
+    progressN: (name, i, n) => `Generating ${name} (${i}/${n})...`,
+    progressAll: (i, n) => `Generating full report (${i}/${n})...`,
+  },
+  ru: {
+    title: 'Анализ Совместимости',
+    subtitle: 'Как два человека подходят друг другу — любовь, семья, бизнес, работа, дружба',
+    backLink: '← Назад к анализу одного человека',
+    personA: 'Человек A',
+    personB: 'Человек B',
+    birthDate: 'Дата Рождения',
+    birthPlace: 'Место Рождения',
+    placePh: 'напр. Чернигов, Украина',
+    placePh2: 'напр. Тбилиси, Грузия',
+    extraLabel: 'Дополнительный контекст (необязательно)',
+    extraPh: 'Профессия родителей, братья/сёстры, статус...',
+    selectHint: 'Нажмите, чтобы выбрать измерения',
+    btnAll: 'Полный отчёт совместимости (все 6)',
+    btnAllProgress: 'Генерация полного отчёта...',
+    downloadPdf: '📄 Скачать PDF',
+    generatingPdf: 'Генерация PDF...',
+    footerPowered: 'На основе поколенческой психологии, социологии и экономики. Без астрологии.',
+    footerBuilt: 'Создал',
+    analyzing: 'Анализ...',
+    alertFill: 'Заполните дату рождения (дд.мм.гггг) и место для обоих людей',
+    pdfTitle: 'Анализ Совместимости',
+    datePh: 'дд.мм.гггг',
+    dims: {
+      love: 'Романтическая Совместимость',
+      family: 'Семейная Совместимость',
+      business: 'Бизнес-Партнёрство',
+      work: 'Рабочее Взаимодействие',
+      friendship: 'Дружеская Совместимость',
+      overall: 'Общая Совместимость'
+    },
+    short: {
+      love: 'Любовь',
+      family: 'Семья',
+      business: 'Бизнес',
+      work: 'Работа',
+      friendship: 'Дружба',
+      overall: 'Общее'
+    },
+    genOne: name => `Сгенерировать: ${name}`,
+    genN: n => `Сгенерировать выбранные (${n})`,
+    selectAbove: 'Выберите измерение выше',
+    progressOne: name => `Генерация: ${name}...`,
+    progressN: (name, i, n) => `Генерация: ${name} (${i}/${n})...`,
+    progressAll: (i, n) => `Генерация отчёта (${i}/${n})...`,
+  }
+};
+
+let currentLang = localStorage.getItem('pa-lang') || 'en';
+function t() { return T[currentLang]; }
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('pa-lang', lang);
+  document.documentElement.lang = lang;
+  document.getElementById('langEn').classList.toggle('active', lang === 'en');
+  document.getElementById('langRu').classList.toggle('active', lang === 'ru');
+  applyLang();
+}
+
+function applyLang() {
+  const l = t();
+  document.title = l.title;
+  document.getElementById('pageTitle').textContent = l.title;
+  document.getElementById('pageSubtitle').textContent = l.subtitle;
+  document.getElementById('backLink').textContent = l.backLink;
+  document.getElementById('personATitle').textContent = l.personA;
+  document.getElementById('personBTitle').textContent = l.personB;
+  document.getElementById('labelDateA').textContent = l.birthDate;
+  document.getElementById('labelDateB').textContent = l.birthDate;
+  document.getElementById('labelPlaceA').textContent = l.birthPlace;
+  document.getElementById('labelPlaceB').textContent = l.birthPlace;
+  document.getElementById('labelExtraA').textContent = l.extraLabel;
+  document.getElementById('labelExtraB').textContent = l.extraLabel;
+  document.getElementById('dateA').placeholder = l.datePh;
+  document.getElementById('dateB').placeholder = l.datePh;
+  document.getElementById('placeA').placeholder = l.placePh;
+  document.getElementById('placeB').placeholder = l.placePh2;
+  document.getElementById('extraA').placeholder = l.extraPh;
+  document.getElementById('extraB').placeholder = l.extraPh;
+  document.getElementById('selectHint').textContent = l.selectHint;
+  document.getElementById('footerPowered').textContent = l.footerPowered;
+  document.getElementById('footerBuilt').textContent = l.footerBuilt;
+
+  // Nav labels
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const key = btn.dataset.section;
+    btn.querySelector('.nav-label').textContent = l.short[key];
+  });
+
+  const btnAll = document.getElementById('btnAll');
+  if (!btnAll.disabled) btnAll.textContent = l.btnAll;
+  const btnPdf = document.getElementById('btnPdf');
+  if (!btnPdf.disabled) btnPdf.textContent = l.downloadPdf;
+
+  updateGenerateBtnLabel();
+
+  // Re-render existing result card titles
+  Object.keys(l.dims).forEach(key => {
+    const card = document.getElementById(`result-${key}`);
+    if (card) {
+      const h2 = card.querySelector('h2');
+      if (h2) h2.textContent = l.dims[key];
+    }
+  });
+}
+
+// ─── Date mask ───
 function attachDateMask(id) {
   const el = document.getElementById(id);
   el.addEventListener('input', function() {
@@ -334,7 +513,7 @@ function attachDateMask(id) {
 attachDateMask('dateA');
 attachDateMask('dateB');
 
-// Place autocomplete — attach to an input + dropdown pair
+// ─── Place autocomplete ───
 function attachPlaceAutocomplete(inputId, dropdownId) {
   const input = document.getElementById(inputId);
   const dropdown = document.getElementById(dropdownId);
@@ -370,41 +549,25 @@ function attachPlaceAutocomplete(inputId, dropdownId) {
 attachPlaceAutocomplete('placeA', 'dropdownA');
 attachPlaceAutocomplete('placeB', 'dropdownB');
 
-const DIMENSIONS = {
-  love: 'Romantic Compatibility',
-  family: 'Family Compatibility',
-  business: 'Business Partnership',
-  work: 'Work Collaboration',
-  friendship: 'Friendship Compatibility',
-  overall: 'Overall Compatibility'
-};
-
-const DIMENSION_SHORT = {
-  love: 'Love',
-  family: 'Family',
-  business: 'Business',
-  work: 'Work',
-  friendship: 'Friendship',
-  overall: 'Overall'
-};
-
+// ─── Dimension logic ───
 const selectedSections = new Set(['love']);
 const results = {};
 
 function getSelectedSections() {
-  return Object.keys(DIMENSIONS).filter(k => selectedSections.has(k));
+  return Object.keys(t().dims).filter(k => selectedSections.has(k));
 }
 
 function updateGenerateBtnLabel() {
   const btn = document.getElementById('btnGenerate');
   if (!btn || btn.disabled) return;
+  const l = t();
   const sel = getSelectedSections();
   if (sel.length === 0) {
-    btn.textContent = 'Select a dimension above';
+    btn.textContent = l.selectAbove;
   } else if (sel.length === 1) {
-    btn.textContent = `Generate ${DIMENSION_SHORT[sel[0]]} Comparison`;
+    btn.textContent = l.genOne(l.short[sel[0]]);
   } else {
-    btn.textContent = `Generate Selected (${sel.length} dimensions)`;
+    btn.textContent = l.genN(sel.length);
   }
 }
 
@@ -450,13 +613,14 @@ function readPerson(prefix) {
 function validatePeople(p1, p2) {
   const dateOk = /^\d{2}\.\d{2}\.\d{4}$/;
   if (!dateOk.test(p1.date) || !p1.place || !dateOk.test(p2.date) || !p2.place) {
-    alert("Please fill in both people's birth date (dd.mm.yyyy) and place");
+    alert(t().alertFill);
     return false;
   }
   return true;
 }
 
 async function streamSection(dimension) {
+  const l = t();
   const person1 = readPerson('A');
   const person2 = readPerson('B');
   if (!validatePeople(person1, person2)) return false;
@@ -471,13 +635,13 @@ async function streamSection(dimension) {
     container.appendChild(card);
   }
   card.className = 'result-card visible';
-  card.innerHTML = `<h2>${DIMENSIONS[dimension]}</h2><div class="loading"><div class="spinner"></div>Analyzing...</div>`;
+  card.innerHTML = `<h2>${l.dims[dimension]}</h2><div class="loading"><div class="spinner"></div>${l.analyzing}</div>`;
 
   try {
     const res = await fetch('/api/compare', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ person1, person2, dimension })
+      body: JSON.stringify({ person1, person2, dimension, language: currentLang })
     });
 
     if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -487,7 +651,7 @@ async function streamSection(dimension) {
     let text = '';
     let buffer = '';
 
-    card.innerHTML = `<h2>${DIMENSIONS[dimension]}</h2><div class="result-content" id="content-${dimension}"></div>`;
+    card.innerHTML = `<h2>${l.dims[dimension]}</h2><div class="result-content" id="content-${dimension}"></div>`;
     const contentEl = document.getElementById(`content-${dimension}`);
 
     while (true) {
@@ -522,17 +686,17 @@ async function streamSection(dimension) {
     return true;
 
   } catch (error) {
-    card.innerHTML = `<h2>${DIMENSIONS[dimension]}</h2><p style="color:#ef4444;">Error: ${error.message}</p>`;
+    card.innerHTML = `<h2>${l.dims[dimension]}</h2><p style="color:#ef4444;">Error: ${error.message}</p>`;
     return false;
   }
 }
 
 async function generateSection() {
   const btn = document.getElementById('btnGenerate');
+  const l = t();
   const sel = getSelectedSections();
   if (sel.length === 0) return;
 
-  // Validate once up-front so the alert fires before disabling the button
   const p1 = readPerson('A');
   const p2 = readPerson('B');
   if (!validatePeople(p1, p2)) return;
@@ -543,8 +707,8 @@ async function generateSection() {
   for (let i = 0; i < sel.length; i++) {
     const dim = sel[i];
     btn.textContent = sel.length === 1
-      ? `Generating ${DIMENSION_SHORT[dim]}...`
-      : `Generating ${DIMENSION_SHORT[dim]} (${i + 1}/${sel.length})...`;
+      ? l.progressOne(l.short[dim])
+      : l.progressN(l.short[dim], i + 1, sel.length);
     await streamSection(dim);
   }
 
@@ -555,6 +719,7 @@ async function generateSection() {
 async function generateAll() {
   const btn = document.getElementById('btnAll');
   const btnGen = document.getElementById('btnGenerate');
+  const l = t();
 
   const p1 = readPerson('A');
   const p2 = readPerson('B');
@@ -562,21 +727,21 @@ async function generateAll() {
 
   btn.disabled = true;
   btnGen.disabled = true;
-  btn.textContent = 'Generating full report...';
+  btn.textContent = l.btnAllProgress;
 
   selectedSections.clear();
-  Object.keys(DIMENSIONS).forEach(d => selectedSections.add(d));
+  Object.keys(l.dims).forEach(d => selectedSections.add(d));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('active'));
 
-  const all = Object.keys(DIMENSIONS);
+  const all = Object.keys(l.dims);
   for (let i = 0; i < all.length; i++) {
-    btn.textContent = `Generating full report (${i + 1}/${all.length})...`;
+    btn.textContent = l.progressAll(i + 1, all.length);
     await streamSection(all[i]);
   }
 
   btn.disabled = false;
   btnGen.disabled = false;
-  btn.textContent = 'Generate Full Compatibility Report (all 6)';
+  btn.textContent = l.btnAll;
   updateGenerateBtnLabel();
 
   document.querySelectorAll('.result-card').forEach(c => c.classList.add('visible'));
@@ -591,8 +756,9 @@ function showPdfButton() {
 
 async function downloadPDF() {
   const btn = document.getElementById('btnPdf');
+  const l = t();
   btn.disabled = true;
-  btn.textContent = 'Generating PDF...';
+  btn.textContent = l.generatingPdf;
 
   try {
     const pdfContainer = document.createElement('div');
@@ -602,23 +768,26 @@ async function downloadPDF() {
     const p2 = readPerson('B');
 
     let sectionsHTML = '';
-    Object.keys(DIMENSIONS).forEach(key => {
+    Object.keys(l.dims).forEach(key => {
       if (results[key]) {
         sectionsHTML += `
           <div style="margin-bottom:28px;padding:24px;background:#f9f9fb;border:1px solid #e0e0e0;border-radius:10px;">
-            <h2 style="color:#5b3cc4;font-size:1.3em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e0e0e0;">${DIMENSIONS[key]}</h2>
+            <h2 style="color:#5b3cc4;font-size:1.3em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #e0e0e0;">${l.dims[key]}</h2>
             <div style="white-space:pre-wrap;line-height:1.8;text-align:justify;color:#2a2a2a;">${formatText(results[key])}</div>
           </div>
         `;
       }
     });
 
+    const personALabel = l.personA;
+    const personBLabel = l.personB;
+
     pdfContainer.innerHTML = `
       <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #e0e0e0;">
-        <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">Compatibility Analysis</h1>
+        <h1 style="color:#5b3cc4;font-size:2em;margin-bottom:10px;">${l.pdfTitle}</h1>
         <div style="display:flex;justify-content:center;gap:30px;color:#666;font-size:0.95em;">
-          <div><strong style="color:#5b3cc4;">Person A</strong><br>${p1.date || '—'} | ${p1.place || '—'}</div>
-          <div><strong style="color:#5b3cc4;">Person B</strong><br>${p2.date || '—'} | ${p2.place || '—'}</div>
+          <div><strong style="color:#5b3cc4;">${personALabel}</strong><br>${p1.date || '—'} | ${p1.place || '—'}</div>
+          <div><strong style="color:#5b3cc4;">${personBLabel}</strong><br>${p2.date || '—'} | ${p2.place || '—'}</div>
         </div>
       </div>
       ${sectionsHTML}
@@ -677,9 +846,12 @@ async function downloadPDF() {
     alert('Failed to generate PDF: ' + error.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = '📄 Download PDF';
+    btn.textContent = t().downloadPdf;
   }
 }
+
+// ─── Init ───
+setLang(currentLang);
 </script>
 
 </body>
