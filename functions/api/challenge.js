@@ -9,7 +9,9 @@ Person B: born ${person2.date} in ${person2.place}.${person2.extra ? ' Context: 
     prompt += `\nCompatibility context (from prior analysis):\n${compatibilitySummary.slice(0, 4000)}\n`;
   }
 
-  prompt += `\nConflict description:\n${conflictText}\n`;
+  if (conflictText) {
+    prompt += `\nConflict description:\n${conflictText}\n`;
+  }
 
   if (chatText) {
     prompt += `\nChat history between them:\n${chatText.slice(0, 8000)}\n`;
@@ -48,7 +50,7 @@ export async function onRequestPost(context) {
   try {
     const { person1, person2, compatibilitySummary, conflictText, images, chatText, language } = await request.json();
 
-    if (!person1?.date || !person1?.place || !person2?.date || !person2?.place || !conflictText) {
+    if (!person1?.date || !person1?.place || !person2?.date || !person2?.place || (!conflictText && !chatText && (!images || images.length === 0))) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

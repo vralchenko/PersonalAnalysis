@@ -541,7 +541,7 @@ const T = {
     challengeBtn: 'Analyze Our Challenge',
     challengeBtnProgress: 'Analyzing conflict...',
     challengeResultTitle: 'Our Challenge — Analysis',
-    challengeNoText: 'Please describe the conflict before analyzing.',
+    challengeNoText: 'Please describe the conflict or upload a file before analyzing.',
     challengeFileTooLarge: 'File too large (max 600KB): ',
     challengeMaxImages: 'Maximum 3 images allowed.',
   },
@@ -598,7 +598,7 @@ const T = {
     challengeBtn: 'Анализ: Наш Вызов',
     challengeBtnProgress: 'Анализ конфликта...',
     challengeResultTitle: 'Наш Вызов — Анализ',
-    challengeNoText: 'Пожалуйста, опишите конфликт перед анализом.',
+    challengeNoText: 'Пожалуйста, опишите конфликт или загрузите файл перед анализом.',
     challengeFileTooLarge: 'Файл слишком большой (макс. 600КБ): ',
     challengeMaxImages: 'Максимум 3 изображения.',
   }
@@ -1112,7 +1112,7 @@ function renderFilePreview() {
 async function generateChallenge() {
   const l = t();
   const conflictText = document.getElementById('challengeText').value.trim();
-  if (!conflictText) { alert(l.challengeNoText); return; }
+  if (!conflictText && !challengeFiles.chatText && challengeFiles.images.length === 0) { alert(l.challengeNoText); return; }
 
   const person1 = readPerson('A');
   const person2 = readPerson('B');
