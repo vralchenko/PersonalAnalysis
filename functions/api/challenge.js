@@ -29,7 +29,8 @@ Structure your response as:
 6. **Next steps** — 3-5 actionable items to move forward.
 7. **Best practices** — ongoing habits to prevent similar conflicts.
 
-Be empathetic, specific, and practical. Never take sides. Use evidence from the profiles, chat history, and screenshots. Write 600-900 words.`;
+Be empathetic, specific, and practical. Never take sides. Use evidence from the profiles, chat history, and screenshots. Write 600-900 words.
+IMPORTANT: You MUST respond in the same language as the system prompt instructs. If told to respond in Russian, your ENTIRE response must be in Russian, regardless of the language of the chat history or conflict description.`;
 
   return prompt;
 }
