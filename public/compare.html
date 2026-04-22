@@ -18,6 +18,7 @@
     --success: #34d399;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { overflow-y: scroll; }
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg);
@@ -248,6 +249,124 @@
   }
   .footer a { color: var(--accent2); text-decoration: none; }
 
+  /* Challenge section */
+  .challenge-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .challenge-section.visible { display: block; }
+  .challenge-section h3 {
+    color: #f59e0b;
+    font-size: 1.1em;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .challenge-section .form-group { margin-bottom: 12px; }
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9em;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: #f59e0b;
+    background: rgba(245,158,11,0.05);
+    color: var(--text);
+  }
+  .upload-zone input[type="file"] { display: none; }
+  .file-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .file-preview-item {
+    position: relative;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85em;
+  }
+  .file-preview-item img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  .file-preview-item .file-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245,158,11,0.15);
+    border-radius: 6px;
+    font-size: 1.2em;
+  }
+  .file-preview-item .remove-file {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.7em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .btn-challenge {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 8px;
+  }
+  .btn-challenge:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245,158,11,0.3); }
+  .btn-challenge:active { transform: translateY(0); }
+  .btn-challenge:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .challenge-result {
+    background: var(--card);
+    border: 1px solid #f59e0b33;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .challenge-result.visible { display: block; }
+  .challenge-result h2 {
+    color: #f59e0b;
+    font-size: 1.3em;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
   @media (max-width: 700px) {
     header h1 { font-size: 1.6em; }
     .people-grid { grid-template-columns: 1fr; }
@@ -337,6 +456,29 @@
   <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">📄 Download PDF</button>
   <div id="results"></div>
 
+  <!-- Our Challenge section -->
+  <div class="challenge-section" id="challengeSection">
+    <h3 id="challengeTitle">Our Challenge</h3>
+    <div class="form-group">
+      <label id="challengeDescLabel">Describe the conflict</label>
+      <textarea id="challengeText" rows="4" placeholder="What happened? What was said? How did it make you feel?"></textarea>
+    </div>
+    <div class="form-group">
+      <label id="challengeUploadLabel">Upload evidence (screenshots, WhatsApp export)</label>
+      <div class="upload-zone" id="uploadZone">
+        <div id="uploadZoneText">Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; .txt chat export</small></div>
+        <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,.txt">
+      </div>
+      <div class="file-preview" id="filePreview"></div>
+    </div>
+    <button class="btn-challenge" id="btnChallenge" onclick="generateChallenge()">Analyze Our Challenge</button>
+  </div>
+
+  <div class="challenge-result" id="challengeResult">
+    <h2 id="challengeResultTitle">Our Challenge — Analysis</h2>
+    <div class="result-content" id="challengeContent"></div>
+  </div>
+
   <div class="footer">
     <p id="footerPowered">Powered by generational psychology, sociology & economics. No astrology.</p>
     <p><span id="footerBuilt">Built by</span> <a href="https://www.linkedin.com/in/victoralchenko/" target="_blank">Viktor Ralchenko</a> | <a href="https://vralchenko-portfolio.pages.dev/en/projects" target="_blank">Portfolio</a></p>
@@ -391,6 +533,17 @@ const T = {
     progressOne: name => `Generating ${name}...`,
     progressN: (name, i, n) => `Generating ${name} (${i}/${n})...`,
     progressAll: (i, n) => `Generating full report (${i}/${n})...`,
+    challengeTitle: 'Our Challenge',
+    challengeDescLabel: 'Describe the conflict',
+    challengeDescPh: 'What happened? What was said? How did it make you feel?',
+    challengeUploadLabel: 'Upload evidence (screenshots, WhatsApp export)',
+    challengeUploadText: 'Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; .txt chat export</small>',
+    challengeBtn: 'Analyze Our Challenge',
+    challengeBtnProgress: 'Analyzing conflict...',
+    challengeResultTitle: 'Our Challenge — Analysis',
+    challengeNoText: 'Please describe the conflict before analyzing.',
+    challengeFileTooLarge: 'File too large (max 600KB): ',
+    challengeMaxImages: 'Maximum 3 images allowed.',
   },
   ru: {
     title: 'Анализ Совместимости',
@@ -437,6 +590,17 @@ const T = {
     progressOne: name => `Генерация: ${name}...`,
     progressN: (name, i, n) => `Генерация: ${name} (${i}/${n})...`,
     progressAll: (i, n) => `Генерация отчёта (${i}/${n})...`,
+    challengeTitle: 'Наш Вызов',
+    challengeDescLabel: 'Опишите конфликт',
+    challengeDescPh: 'Что произошло? Что было сказано? Как вы себя чувствовали?',
+    challengeUploadLabel: 'Загрузите доказательства (скриншоты, экспорт WhatsApp)',
+    challengeUploadText: 'Перетащите файлы сюда или нажмите для выбора<br><small>Изображения (макс. 3, 600КБ каждое) и .txt экспорт чата</small>',
+    challengeBtn: 'Анализ: Наш Вызов',
+    challengeBtnProgress: 'Анализ конфликта...',
+    challengeResultTitle: 'Наш Вызов — Анализ',
+    challengeNoText: 'Пожалуйста, опишите конфликт перед анализом.',
+    challengeFileTooLarge: 'Файл слишком большой (макс. 600КБ): ',
+    challengeMaxImages: 'Максимум 3 изображения.',
   }
 };
 
@@ -488,6 +652,16 @@ function applyLang() {
   if (!btnPdf.disabled) btnPdf.textContent = l.downloadPdf;
 
   updateGenerateBtnLabel();
+
+  // Challenge section
+  document.getElementById('challengeTitle').textContent = l.challengeTitle;
+  document.getElementById('challengeDescLabel').textContent = l.challengeDescLabel;
+  document.getElementById('challengeText').placeholder = l.challengeDescPh;
+  document.getElementById('challengeUploadLabel').textContent = l.challengeUploadLabel;
+  document.getElementById('uploadZoneText').innerHTML = l.challengeUploadText;
+  document.getElementById('challengeResultTitle').textContent = l.challengeResultTitle;
+  const btnChallenge = document.getElementById('btnChallenge');
+  if (!btnChallenge.disabled) btnChallenge.textContent = l.challengeBtn;
 
   // Re-render existing result card titles
   Object.keys(l.dims).forEach(key => {
@@ -751,6 +925,7 @@ async function generateAll() {
 function showPdfButton() {
   if (Object.keys(results).length > 0) {
     document.getElementById('btnPdf').style.display = 'block';
+    showChallengeSection();
   }
 }
 
@@ -850,7 +1025,173 @@ async function downloadPDF() {
   }
 }
 
+// ─── Challenge feature ───
+const challengeFiles = { images: [], chatText: '' };
+
+function showChallengeSection() {
+  document.getElementById('challengeSection').classList.add('visible');
+}
+
+function initUploadZone() {
+  const zone = document.getElementById('uploadZone');
+  const input = document.getElementById('fileInput');
+
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+  input.addEventListener('change', () => { handleFiles(input.files); input.value = ''; });
+}
+
+function handleFiles(fileList) {
+  const l = t();
+  for (const file of fileList) {
+    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        challengeFiles.chatText = reader.result.slice(0, 8000);
+        renderFilePreview();
+      };
+      reader.readAsText(file);
+    } else if (file.type.startsWith('image/')) {
+      if (challengeFiles.images.length >= 3) {
+        alert(l.challengeMaxImages);
+        continue;
+      }
+      if (file.size > 600 * 1024) {
+        alert(l.challengeFileTooLarge + file.name);
+        continue;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        challengeFiles.images.push({ name: file.name, dataUrl: reader.result });
+        renderFilePreview();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+}
+
+function removeImage(index) {
+  challengeFiles.images.splice(index, 1);
+  renderFilePreview();
+}
+
+function removeChatText() {
+  challengeFiles.chatText = '';
+  renderFilePreview();
+}
+
+function renderFilePreview() {
+  const container = document.getElementById('filePreview');
+  let html = '';
+
+  challengeFiles.images.forEach((img, i) => {
+    html += `<div class="file-preview-item">
+      <img src="${img.dataUrl}" alt="${img.name}">
+      <span>${img.name.length > 15 ? img.name.slice(0, 12) + '...' : img.name}</span>
+      <button class="remove-file" onclick="removeImage(${i})">X</button>
+    </div>`;
+  });
+
+  if (challengeFiles.chatText) {
+    html += `<div class="file-preview-item">
+      <div class="file-icon">TXT</div>
+      <span>Chat export (${Math.round(challengeFiles.chatText.length / 1000)}k chars)</span>
+      <button class="remove-file" onclick="removeChatText()">X</button>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+async function generateChallenge() {
+  const l = t();
+  const conflictText = document.getElementById('challengeText').value.trim();
+  if (!conflictText) { alert(l.challengeNoText); return; }
+
+  const person1 = readPerson('A');
+  const person2 = readPerson('B');
+  if (!validatePeople(person1, person2)) return;
+
+  const btn = document.getElementById('btnChallenge');
+  btn.disabled = true;
+  btn.textContent = l.challengeBtnProgress;
+
+  // Build compatibility summary from existing results
+  let compatibilitySummary = '';
+  Object.keys(results).forEach(key => {
+    if (results[key]) compatibilitySummary += `${key}: ${results[key]}\n\n`;
+  });
+
+  const resultCard = document.getElementById('challengeResult');
+  const contentEl = document.getElementById('challengeContent');
+  resultCard.classList.add('visible');
+  contentEl.innerHTML = `<div class="loading"><div class="spinner"></div>${l.analyzing}</div>`;
+
+  try {
+    const body = {
+      person1, person2,
+      compatibilitySummary,
+      conflictText,
+      images: challengeFiles.images.map(img => img.dataUrl),
+      chatText: challengeFiles.chatText,
+      language: currentLang
+    };
+
+    const res = await fetch('/api/challenge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let text = '';
+    let buffer = '';
+
+    contentEl.innerHTML = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        const data = trimmed.slice(6);
+        if (data === '[DONE]') break;
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content || '';
+          if (content) {
+            text += content;
+            contentEl.innerHTML = formatText(text);
+          }
+        } catch {}
+      }
+    }
+
+  } catch (error) {
+    contentEl.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = l.challengeBtn;
+  }
+}
+
 // ─── Init ───
+initUploadZone();
 setLang(currentLang);
 </script>
 
