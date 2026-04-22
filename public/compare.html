@@ -1068,7 +1068,7 @@ async function downloadPDF() {
 }
 
 // ─── Challenge feature ───
-const challengeFiles = { images: [], chatText: '' };
+const challengeFiles = { images: [], chatTexts: [] };
 
 function showChallengeSection() {
   document.getElementById('challengeSection').classList.add('visible');
@@ -1093,9 +1093,10 @@ function handleFiles(fileList) {
   const l = t();
   for (const file of fileList) {
     if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+      const fileName = file.name;
       const reader = new FileReader();
       reader.onload = () => {
-        challengeFiles.chatText = reader.result.slice(0, 8000);
+        challengeFiles.chatTexts.push({ name: fileName, text: reader.result.slice(0, 8000) });
         renderFilePreview();
       };
       reader.readAsText(file);
@@ -1123,8 +1124,8 @@ function removeImage(index) {
   renderFilePreview();
 }
 
-function removeChatText() {
-  challengeFiles.chatText = '';
+function removeChatText(index) {
+  challengeFiles.chatTexts.splice(index, 1);
   renderFilePreview();
 }
 
@@ -1140,13 +1141,13 @@ function renderFilePreview() {
     </div>`;
   });
 
-  if (challengeFiles.chatText) {
+  challengeFiles.chatTexts.forEach((ct, i) => {
     html += `<div class="file-preview-item">
       <div class="file-icon">TXT</div>
-      <span>Chat export (${Math.round(challengeFiles.chatText.length / 1000)}k chars)</span>
-      <button class="remove-file" onclick="removeChatText()">X</button>
+      <span>${ct.name.length > 20 ? ct.name.slice(0, 17) + '...' : ct.name} (${Math.round(ct.text.length / 1000)}k)</span>
+      <button class="remove-file" onclick="removeChatText(${i})">X</button>
     </div>`;
-  }
+  });
 
   container.innerHTML = html;
 }
@@ -1154,7 +1155,7 @@ function renderFilePreview() {
 async function generateChallenge() {
   const l = t();
   const conflictText = document.getElementById('challengeText').value.trim();
-  if (!conflictText && !challengeFiles.chatText && challengeFiles.images.length === 0) { showToast(l.challengeNoText, 'warning'); return; }
+  if (!conflictText && challengeFiles.chatTexts.length === 0 && challengeFiles.images.length === 0) { showToast(l.challengeNoText, 'warning'); return; }
 
   const person1 = readPerson('A');
   const person2 = readPerson('B');
@@ -1181,7 +1182,7 @@ async function generateChallenge() {
       compatibilitySummary,
       conflictText,
       images: challengeFiles.images.map(img => img.dataUrl),
-      chatText: challengeFiles.chatText,
+      chatText: challengeFiles.chatTexts.map(ct => ct.text).join('\n\n---\n\n'),
       language: currentLang
     };
 
