@@ -448,14 +448,6 @@
     </div>
   </div>
 
-  <div class="actions-card">
-    <button class="btn-generate" id="btnGenerate" onclick="generateSection()">Generate Love Comparison</button>
-    <button class="btn-all" id="btnAll" onclick="generateAll()">Generate Full Compatibility Report (all 6)</button>
-  </div>
-
-  <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">📄 Download PDF</button>
-  <div id="results"></div>
-
   <!-- Our Challenge section -->
   <div class="challenge-section visible" id="challengeSection">
     <h3 id="challengeTitle">Our Challenge</h3>
@@ -471,8 +463,16 @@
       </div>
       <div class="file-preview" id="filePreview"></div>
     </div>
+  </div>
+
+  <div class="actions-card">
+    <button class="btn-generate" id="btnGenerate" onclick="generateSection()">Generate Love Comparison</button>
+    <button class="btn-all" id="btnAll" onclick="generateAll()">Generate Full Compatibility Report (all 6)</button>
     <button class="btn-challenge" id="btnChallenge" onclick="generateChallenge()">Analyze Our Challenge</button>
   </div>
+
+  <button class="btn-pdf" id="btnPdf" onclick="downloadPDF()">📄 Download PDF</button>
+  <div id="results"></div>
 
   <div class="challenge-result" id="challengeResult">
     <h2 id="challengeResultTitle">Our Challenge — Analysis</h2>
