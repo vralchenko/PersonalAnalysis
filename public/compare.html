@@ -483,8 +483,8 @@
     <div class="form-group">
       <label id="challengeUploadLabel">Upload evidence (screenshots, WhatsApp export)</label>
       <div class="upload-zone" id="uploadZone">
-        <div id="uploadZoneText">Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; .txt chat export</small></div>
-        <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,.txt">
+        <div id="uploadZoneText">Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; documents (.txt, .html, .pdf)</small></div>
+        <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,.txt,.pdf,.html">
       </div>
       <div class="file-preview" id="filePreview"></div>
     </div>
@@ -579,7 +579,7 @@ const T = {
     challengeDescLabel: 'Describe the conflict',
     challengeDescPh: 'What happened? What was said? How did it make you feel?',
     challengeUploadLabel: 'Upload evidence (screenshots, WhatsApp export)',
-    challengeUploadText: 'Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; .txt chat export</small>',
+    challengeUploadText: 'Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; documents (.txt, .html, .pdf)</small>',
     challengeBtn: 'Analyze Our Challenge',
     challengeBtnProgress: 'Analyzing conflict...',
     challengeResultTitle: 'Our Challenge — Analysis',
@@ -636,7 +636,7 @@ const T = {
     challengeDescLabel: 'Опишите конфликт',
     challengeDescPh: 'Что произошло? Что было сказано? Как вы себя чувствовали?',
     challengeUploadLabel: 'Загрузите доказательства (скриншоты, экспорт WhatsApp)',
-    challengeUploadText: 'Перетащите файлы сюда или нажмите для выбора<br><small>Изображения (макс. 3, 600КБ каждое) и .txt экспорт чата</small>',
+    challengeUploadText: 'Перетащите файлы сюда или нажмите для выбора<br><small>Изображения (макс. 3, 600КБ каждое) и документы (.txt, .html, .pdf)</small>',
     challengeBtn: 'Анализ: Наш Вызов',
     challengeBtnProgress: 'Анализ конфликта...',
     challengeResultTitle: 'Наш Вызов — Анализ',
@@ -1092,7 +1092,8 @@ function initUploadZone() {
 function handleFiles(fileList) {
   const l = t();
   for (const file of fileList) {
-    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+    const isTextFile = file.type === 'text/plain' || file.type === 'text/html' || file.name.endsWith('.txt') || file.name.endsWith('.html') || file.name.endsWith('.pdf');
+    if (isTextFile) {
       const fileName = file.name;
       const reader = new FileReader();
       reader.onload = () => {
