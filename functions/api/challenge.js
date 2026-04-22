@@ -58,7 +58,7 @@ export async function onRequestPost(context) {
       });
     }
 
-    const systemPrompt = `You are an expert in conflict resolution, generational psychology, and interpersonal communication. You analyze conflicts between people using their background context, behavioral patterns, and communication evidence. You are empathetic, balanced, and never take sides. Your tone is warm, honest, and constructive.${language === 'ru' ? ' Respond entirely in Russian.' : ''}`;
+    const systemPrompt = `You are an expert in conflict resolution, generational psychology, and interpersonal communication. You analyze conflicts between people using their background context, behavioral patterns, and communication evidence. You are empathetic, balanced, and never take sides. Your tone is warm, honest, and constructive.${language === 'ru' ? ' Respond entirely in Russian. Do not use any other languages — no English words, no characters from other scripts (Thai, Korean, Chinese, Japanese, etc.). Every word must be in Russian.' : ''}`;
 
     const userPrompt = buildChallengePrompt(person1, person2, compatibilitySummary, conflictText, chatText);
 

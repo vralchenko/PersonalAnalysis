@@ -367,6 +367,31 @@
     border-bottom: 1px solid var(--border);
   }
 
+  /* Toast notifications */
+  .toast-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    z-index: 9999;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 24px;
+    color: var(--text);
+    font-size: 0.92em;
+    max-width: 440px;
+    width: max-content;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    animation: toastIn 0.3s ease forwards;
+    border-left: 4px solid #f59e0b;
+  }
+  .toast-notification.error { border-left-color: #ef4444; }
+  .toast-notification.warning { border-left-color: #f59e0b; }
+  .toast-notification.fade-out { animation: toastOut 0.3s ease forwards; }
+  @keyframes toastIn { to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+  @keyframes toastOut { to { transform: translateX(-50%) translateY(-20px); opacity: 0; } }
+
   @media (max-width: 700px) {
     header h1 { font-size: 1.6em; }
     .people-grid { grid-template-columns: 1fr; }
@@ -486,6 +511,23 @@
 </div>
 
 <script>
+// ─── Toast notifications ───
+function showToast(message, type = 'warning') {
+  const toast = document.createElement('div');
+  toast.className = `toast-notification ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('fade-out');
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+// ─── Sanitize non-expected script artifacts ───
+function sanitizeText(text) {
+  return text.replace(/[\u0E00-\u0E7F\uAC00-\uD7AF\u1100-\u11FF\u4E00-\u9FFF\u3400-\u4DBF\u3000-\u303F\u3040-\u309F\u30A0-\u30FF]/g, '');
+}
+
 // ─── Translations ───
 const T = {
   en: {
@@ -699,7 +741,7 @@ function attachPlaceAutocomplete(inputId, dropdownId) {
     if (q.length < 2) { dropdown.style.display = 'none'; return; }
     timer = setTimeout(async () => {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=5&featuretype=city,town,village`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=5&featuretype=city,town,village&accept-language=${currentLang}`);
         const data = await res.json();
         const items = [...new Set(data.map(item => {
           const city = item.address.city || item.address.town || item.address.village || '';
@@ -787,7 +829,7 @@ function readPerson(prefix) {
 function validatePeople(p1, p2) {
   const dateOk = /^\d{2}\.\d{2}\.\d{4}$/;
   if (!dateOk.test(p1.date) || !p1.place || !dateOk.test(p2.date) || !p2.place) {
-    alert(t().alertFill);
+    showToast(t().alertFill, 'warning');
     return false;
   }
   return true;
@@ -845,7 +887,7 @@ async function streamSection(dimension) {
           const parsed = JSON.parse(data);
           const content = parsed.choices?.[0]?.delta?.content || '';
           if (content) {
-            text += content;
+            text += sanitizeText(content);
             contentEl.innerHTML = formatText(text);
           }
         } catch {}
@@ -1018,7 +1060,7 @@ async function downloadPDF() {
 
   } catch (error) {
     console.error('PDF error:', error);
-    alert('Failed to generate PDF: ' + error.message);
+    showToast('Failed to generate PDF: ' + error.message, 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = t().downloadPdf;
@@ -1059,11 +1101,11 @@ function handleFiles(fileList) {
       reader.readAsText(file);
     } else if (file.type.startsWith('image/')) {
       if (challengeFiles.images.length >= 3) {
-        alert(l.challengeMaxImages);
+        showToast(l.challengeMaxImages, 'warning');
         continue;
       }
       if (file.size > 600 * 1024) {
-        alert(l.challengeFileTooLarge + file.name);
+        showToast(l.challengeFileTooLarge + file.name, 'warning');
         continue;
       }
       const reader = new FileReader();
@@ -1112,7 +1154,7 @@ function renderFilePreview() {
 async function generateChallenge() {
   const l = t();
   const conflictText = document.getElementById('challengeText').value.trim();
-  if (!conflictText && !challengeFiles.chatText && challengeFiles.images.length === 0) { alert(l.challengeNoText); return; }
+  if (!conflictText && !challengeFiles.chatText && challengeFiles.images.length === 0) { showToast(l.challengeNoText, 'warning'); return; }
 
   const person1 = readPerson('A');
   const person2 = readPerson('B');
@@ -1175,7 +1217,7 @@ async function generateChallenge() {
           const parsed = JSON.parse(data);
           const content = parsed.choices?.[0]?.delta?.content || '';
           if (content) {
-            text += content;
+            text += sanitizeText(content);
             contentEl.innerHTML = formatText(text);
           }
         } catch {}
