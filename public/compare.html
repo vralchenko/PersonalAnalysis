@@ -392,6 +392,67 @@
   @keyframes toastIn { to { transform: translateX(-50%) translateY(0); opacity: 1; } }
   @keyframes toastOut { to { transform: translateX(-50%) translateY(-20px); opacity: 0; } }
 
+  /* Chat */
+  #chatMessages {
+    display: flex;
+    flex-direction: column;
+    max-height: 400px;
+    overflow-y: auto;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 4px 0;
+  }
+  .chat-msg {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 0.92em;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .chat-msg.user {
+    align-self: flex-end;
+    background: rgba(245,158,11,0.15);
+    color: var(--text);
+  }
+  .chat-msg.assistant {
+    align-self: flex-start;
+    background: rgba(124,92,252,0.1);
+    color: var(--text);
+  }
+  #chatInputArea {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  #chatInput {
+    flex: 1;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 0.95em;
+    font-family: inherit;
+    resize: none;
+    transition: border 0.3s;
+  }
+  #chatInput:focus { outline: none; border-color: var(--accent); }
+  #chatSendBtn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.92em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  #chatSendBtn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(245,158,11,0.3); }
+  #chatSendBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
   @media (max-width: 700px) {
     header h1 { font-size: 1.6em; }
     .people-grid { grid-template-columns: 1fr; }
@@ -483,7 +544,7 @@
     <div class="form-group">
       <label id="challengeUploadLabel">Upload evidence (screenshots, WhatsApp export)</label>
       <div class="upload-zone" id="uploadZone">
-        <div id="uploadZoneText">Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; documents (.txt, .html, .pdf)</small></div>
+        <div id="uploadZoneText">Drag & drop files here, or click to browse<br><small>Images (max 10, 600KB each) &amp; documents (.txt, .html, .pdf)</small></div>
         <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,.txt,.pdf,.html">
       </div>
       <div class="file-preview" id="filePreview"></div>
@@ -502,6 +563,16 @@
   <div class="challenge-result" id="challengeResult">
     <h2 id="challengeResultTitle">Our Challenge — Analysis</h2>
     <div class="result-content" id="challengeContent"></div>
+    <div id="challengeChat" style="display:none;">
+      <div style="border-top:1px solid var(--border); margin-top:20px; padding-top:16px;">
+        <h3 id="chatTitle" style="color:#f59e0b; font-size:1em; margin-bottom:12px;">Continue the conversation</h3>
+        <div id="chatMessages"></div>
+        <div id="chatInputArea">
+          <textarea id="chatInput" rows="2" placeholder="Ask a follow-up..."></textarea>
+          <button id="chatSendBtn" onclick="sendChatMessage()">Send</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="footer">
@@ -579,13 +650,16 @@ const T = {
     challengeDescLabel: 'Describe the conflict',
     challengeDescPh: 'What happened? What was said? How did it make you feel?',
     challengeUploadLabel: 'Upload evidence (screenshots, WhatsApp export)',
-    challengeUploadText: 'Drag & drop files here, or click to browse<br><small>Images (max 3, 600KB each) &amp; documents (.txt, .html, .pdf)</small>',
+    challengeUploadText: 'Drag & drop files here, or click to browse<br><small>Images (max 10, 600KB each) &amp; documents (.txt, .html, .pdf)</small>',
     challengeBtn: 'Analyze Our Challenge',
     challengeBtnProgress: 'Analyzing conflict...',
     challengeResultTitle: 'Our Challenge — Analysis',
     challengeNoText: 'Please describe the conflict or upload a file before analyzing.',
     challengeFileTooLarge: 'File too large (max 600KB): ',
-    challengeMaxImages: 'Maximum 3 images allowed.',
+    challengeMaxImages: 'Maximum 10 images allowed.',
+    chatTitle: 'Continue the conversation',
+    chatPlaceholder: 'Ask a follow-up question, or ask me to draft a reply...',
+    chatSend: 'Send',
   },
   ru: {
     title: 'Анализ Совместимости',
@@ -636,13 +710,16 @@ const T = {
     challengeDescLabel: 'Опишите конфликт',
     challengeDescPh: 'Что произошло? Что было сказано? Как вы себя чувствовали?',
     challengeUploadLabel: 'Загрузите доказательства (скриншоты, экспорт WhatsApp)',
-    challengeUploadText: 'Перетащите файлы сюда или нажмите для выбора<br><small>Изображения (макс. 3, 600КБ каждое) и документы (.txt, .html, .pdf)</small>',
+    challengeUploadText: 'Перетащите файлы сюда или нажмите для выбора<br><small>Изображения (макс. 10, 600КБ каждое) и документы (.txt, .html, .pdf)</small>',
     challengeBtn: 'Анализ: Наш Вызов',
     challengeBtnProgress: 'Анализ конфликта...',
     challengeResultTitle: 'Наш Вызов — Анализ',
     challengeNoText: 'Пожалуйста, опишите конфликт или загрузите файл перед анализом.',
     challengeFileTooLarge: 'Файл слишком большой (макс. 600КБ): ',
-    challengeMaxImages: 'Максимум 3 изображения.',
+    challengeMaxImages: 'Максимум 10 изображений.',
+    chatTitle: 'Продолжить разговор',
+    chatPlaceholder: 'Задайте вопрос или попросите составить ответ...',
+    chatSend: 'Отправить',
   }
 };
 
@@ -704,6 +781,12 @@ function applyLang() {
   document.getElementById('challengeResultTitle').textContent = l.challengeResultTitle;
   const btnChallenge = document.getElementById('btnChallenge');
   if (!btnChallenge.disabled) btnChallenge.textContent = l.challengeBtn;
+
+  // Chat section
+  document.getElementById('chatTitle').textContent = l.chatTitle;
+  document.getElementById('chatInput').placeholder = l.chatPlaceholder;
+  const chatSendBtn = document.getElementById('chatSendBtn');
+  if (!chatSendBtn.disabled) chatSendBtn.textContent = l.chatSend;
 
   // Re-render existing result card titles
   Object.keys(l.dims).forEach(key => {
@@ -1070,6 +1153,12 @@ async function downloadPDF() {
 // ─── Challenge feature ───
 const challengeFiles = { images: [], chatTexts: [] };
 
+// ─── Chat state ───
+let chatHistory = [];
+let challengeAnalysisText = '';
+let challengeContext = null;
+let isChatStreaming = false;
+
 function showChallengeSection() {
   document.getElementById('challengeSection').classList.add('visible');
 }
@@ -1102,7 +1191,7 @@ function handleFiles(fileList) {
       };
       reader.readAsText(file);
     } else if (file.type.startsWith('image/')) {
-      if (challengeFiles.images.length >= 3) {
+      if (challengeFiles.images.length >= 10) {
         showToast(l.challengeMaxImages, 'warning');
         continue;
       }
@@ -1162,6 +1251,13 @@ async function generateChallenge() {
   const person2 = readPerson('B');
   if (!validatePeople(person1, person2)) return;
 
+  // Reset chat state
+  chatHistory = [];
+  challengeAnalysisText = '';
+  challengeContext = null;
+  document.getElementById('challengeChat').style.display = 'none';
+  document.getElementById('chatMessages').innerHTML = '';
+
   const btn = document.getElementById('btnChallenge');
   btn.disabled = true;
   btn.textContent = l.challengeBtnProgress;
@@ -1177,13 +1273,15 @@ async function generateChallenge() {
   resultCard.classList.add('visible');
   contentEl.innerHTML = `<div class="loading"><div class="spinner"></div>${l.analyzing}</div>`;
 
+  const chatTextCombined = challengeFiles.chatTexts.map(ct => ct.text).join('\n\n---\n\n');
+
   try {
     const body = {
       person1, person2,
       compatibilitySummary,
       conflictText,
       images: challengeFiles.images.map(img => img.dataUrl),
-      chatText: challengeFiles.chatTexts.map(ct => ct.text).join('\n\n---\n\n'),
+      chatText: chatTextCombined,
       language: currentLang
     };
 
@@ -1226,6 +1324,11 @@ async function generateChallenge() {
       }
     }
 
+    // Save context for chat follow-ups
+    challengeAnalysisText = text;
+    challengeContext = { person1, person2, compatibilitySummary, conflictText, chatText: chatTextCombined };
+    document.getElementById('challengeChat').style.display = 'block';
+
   } catch (error) {
     contentEl.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
   } finally {
@@ -1233,6 +1336,119 @@ async function generateChallenge() {
     btn.textContent = l.challengeBtn;
   }
 }
+
+// ─── Chat functions ───
+function buildContextMessage() {
+  if (!challengeContext) return '';
+  const c = challengeContext;
+  let msg = `Person A: born ${c.person1.date} in ${c.person1.place}.`;
+  if (c.person1.extra) msg += ` Context: ${c.person1.extra}.`;
+  msg += `\nPerson B: born ${c.person2.date} in ${c.person2.place}.`;
+  if (c.person2.extra) msg += ` Context: ${c.person2.extra}.`;
+  if (c.conflictText) msg += `\n\nConflict: ${c.conflictText}`;
+  if (c.chatText) msg += `\n\nChat excerpt: ${c.chatText.slice(0, 2000)}`;
+  if (c.compatibilitySummary) msg += `\n\nCompatibility summary: ${c.compatibilitySummary.slice(0, 2000)}`;
+  return msg;
+}
+
+function appendChatBubble(role, text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  div.innerHTML = role === 'assistant' ? formatText(text) : text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  container.appendChild(div);
+  scrollChatToBottom();
+  return div;
+}
+
+function scrollChatToBottom() {
+  const container = document.getElementById('chatMessages');
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage() {
+  if (isChatStreaming) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  chatHistory.push({ role: 'user', content: text });
+  appendChatBubble('user', text);
+
+  // Build messages: context + initial analysis + chat history
+  const messages = [
+    { role: 'user', content: buildContextMessage() },
+    { role: 'assistant', content: challengeAnalysisText },
+    ...chatHistory
+  ];
+
+  const sendBtn = document.getElementById('chatSendBtn');
+  sendBtn.disabled = true;
+  isChatStreaming = true;
+
+  const bubble = appendChatBubble('assistant', '');
+  bubble.innerHTML = `<div class="loading" style="padding:0;"><div class="spinner"></div></div>`;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, language: currentLang })
+    });
+
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let assistantText = '';
+    let buffer = '';
+
+    bubble.innerHTML = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        const data = trimmed.slice(6);
+        if (data === '[DONE]') break;
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content || '';
+          if (content) {
+            assistantText += sanitizeText(content);
+            bubble.innerHTML = formatText(assistantText);
+            scrollChatToBottom();
+          }
+        } catch {}
+      }
+    }
+
+    chatHistory.push({ role: 'assistant', content: assistantText });
+
+  } catch (error) {
+    bubble.innerHTML = `<span style="color:#ef4444;">Error: ${error.message}</span>`;
+  } finally {
+    isChatStreaming = false;
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+// Enter to send, Shift+Enter for newline
+document.getElementById('chatInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
 
 // ─── Init ───
 initUploadZone();
