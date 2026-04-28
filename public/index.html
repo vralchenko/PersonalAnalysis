@@ -8,14 +8,14 @@
 <script src="https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <style>
   :root {
-    --bg: #0a0a0f;
-    --card: #12121f;
-    --border: #1e1e35;
+    --bg: #f5f3ff;
+    --card: #ffffff;
+    --border: #e0daf5;
     --accent: #7c5cfc;
-    --accent2: #a78bfa;
-    --text: #e8e6f0;
-    --muted: #8888a8;
-    --success: #34d399;
+    --accent2: #6d28d9;
+    --text: #1e1b2e;
+    --muted: #6b6889;
+    --success: #059669;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -69,6 +69,7 @@
     border-radius: 16px;
     padding: 20px 28px;
     margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(124,92,252,0.06);
   }
   .form-row { display: flex; gap: 12px; margin-bottom: 10px; }
   .form-group { flex: 1; position: relative; }
@@ -84,7 +85,7 @@
   input, textarea {
     width: 100%;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(124,92,252,0.05);
     border: 1px solid var(--border);
     border-radius: 10px;
     color: var(--text);
@@ -111,7 +112,7 @@
     transition: all 0.3s;
     margin-top: 6px;
   }
-  .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124,92,252,0.3); }
+  .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124,92,252,0.25); }
   .btn-generate:active { transform: translateY(0); }
   .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
@@ -147,6 +148,7 @@
     padding: 28px;
     margin-bottom: 20px;
     display: none;
+    box-shadow: 0 2px 12px rgba(124,92,252,0.06);
   }
   .result-card.visible { display: block; }
   .result-card h2 {
@@ -245,7 +247,7 @@
     font-size: 0.92em;
     max-width: 440px;
     width: max-content;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
     animation: toastIn 0.3s ease forwards;
     border-left: 4px solid #f59e0b;
   }
